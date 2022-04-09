@@ -35,6 +35,11 @@
       <artifactId>slf4j-api</artifactId>
       <version>1.7.36</version>
     </dependency>
+    <dependency>
+      <groupId>com.github.javaparser</groupId>
+      <artifactId>java-symbol-solver-core</artifactId>
+      <version>0.6.3</version>
+    </dependency>
   </dependencies>
 
   <build>
