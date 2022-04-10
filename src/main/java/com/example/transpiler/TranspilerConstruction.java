@@ -10,14 +10,23 @@ import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class TranspilerConstruction {
 
-    public static void main(String[] args) {
+    private final static String PATH = "src/main/java/com/example/transpiler/generated/";
+
+    public static void main(String[] args) throws IOException {
 
         CompilationUnit cu = new CompilationUnit();
 
-        cu.setPackageDeclaration("jpexample.model");
+        cu.setPackageDeclaration("com.example.transpiler.generated");
 
         ClassOrInterfaceDeclaration book = cu.addClass("Book");
         book.addField("String", "title");
@@ -44,6 +53,12 @@ public class TranspilerConstruction {
 
         System.out.println(cu.toString());
 
+        String FILE_NAME = PATH + "Book.java";
+        Path path = Paths.get(FILE_NAME);
+        Files.createFile(path);
+        OutputStream out = new FileOutputStream(FILE_NAME);
+        out.write(cu.toString().getBytes());
+        out.close();
     }
 
 }
