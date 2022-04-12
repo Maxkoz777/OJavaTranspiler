@@ -1,5 +1,6 @@
 package com.example.transpiler;
 
+import com.example.transpiler.codeGenerator.JavaCodeGenerator;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -10,7 +11,6 @@ import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -20,9 +20,23 @@ import java.nio.file.Paths;
 
 public class TranspilerConstruction {
 
-    private final static String PATH = "src/main/java/com/example/transpiler/generated/";
-
     public static void main(String[] args) throws IOException {
+
+        // main program
+        TranspilerUtil.retrieveSourceLanguageLibraryFiles()
+                .forEach(JavaCodeGenerator::generateJavaLibFile);
+
+        TranspilerUtil.retrieveSourceLanguageFiles()
+            .forEach(JavaCodeGenerator::generateJavaFile);
+
+        // example parser
+//        example();
+
+    }
+
+    private static void example() throws IOException {
+
+        final String PATH = "src/main/java/com/example/transpiler/generated/";
 
         CompilationUnit cu = new CompilationUnit();
 
