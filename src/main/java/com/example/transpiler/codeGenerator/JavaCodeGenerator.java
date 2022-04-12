@@ -1,9 +1,7 @@
 package com.example.transpiler.codeGenerator;
 
-import com.google.common.io.Resources;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.GenericArrayType;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,7 +14,7 @@ public class JavaCodeGenerator {
 
     // public contract
 
-    public void generateJavaFile(File file) {
+    public void generateJavaSourceFile(File file) {
         generateJavaCodeForClass(file, ClassType.SOURCE);
     }
 

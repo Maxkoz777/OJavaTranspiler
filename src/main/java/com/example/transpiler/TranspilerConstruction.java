@@ -27,7 +27,7 @@ public class TranspilerConstruction {
                 .forEach(JavaCodeGenerator::generateJavaLibFile);
 
         TranspilerUtil.retrieveSourceLanguageFiles()
-            .forEach(JavaCodeGenerator::generateJavaFile);
+            .forEach(JavaCodeGenerator::generateJavaSourceFile);
 
         // example parser
 //        example();
