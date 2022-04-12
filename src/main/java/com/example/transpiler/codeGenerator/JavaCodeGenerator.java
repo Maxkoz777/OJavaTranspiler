@@ -1,10 +1,13 @@
 package com.example.transpiler.codeGenerator;
 
+import com.example.transpiler.lexer.Lexer;
+import com.example.transpiler.lexer.Token;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,7 +18,7 @@ public class JavaCodeGenerator {
     // public contract
 
     public void generateJavaSourceFile(File file) {
-        generateJavaCodeForClass(file, ClassType.SOURCE);
+//        generateJavaCodeForClass(file, ClassType.SOURCE);
     }
 
     public void generateJavaLibFile(File file) {
@@ -28,6 +31,8 @@ public class JavaCodeGenerator {
 
         try {
             String stringWithSourceCode = getStringForFile(file);
+            List<Token> tokens = Lexer.getTokensFromCode(stringWithSourceCode);
+            
         }
         catch (IOException e) {
             log.error("No such file with name {}", file.getPath(), e);

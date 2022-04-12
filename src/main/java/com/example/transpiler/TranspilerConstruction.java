@@ -1,6 +1,7 @@
 package com.example.transpiler;
 
 import com.example.transpiler.codeGenerator.JavaCodeGenerator;
+import com.example.transpiler.util.TranspilerUtil;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;

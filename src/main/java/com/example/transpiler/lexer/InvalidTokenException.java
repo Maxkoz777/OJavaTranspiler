@@ -1,6 +1,6 @@
 package com.example.transpiler.lexer;
 
-public class InvalidTokenException extends Exception {
+public class InvalidTokenException extends RuntimeException {
     private final String lexeme;
 
     public String getLexeme() {

@@ -1,4 +1,4 @@
-package com.example.transpiler;
+package com.example.transpiler.util;
 
 import java.io.File;
 import java.net.URL;
@@ -10,11 +10,11 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TranspilerUtil {
 
-    List<File> retrieveSourceLanguageFiles() {
+    public List<File> retrieveSourceLanguageFiles() {
         return getResourceFolderFiles("sourceCode");
     }
 
-    List<File> retrieveSourceLanguageLibraryFiles() {
+    public List<File> retrieveSourceLanguageLibraryFiles() {
         return getResourceFolderFiles("lib");
     }
 
