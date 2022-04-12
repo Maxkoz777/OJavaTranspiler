@@ -2,6 +2,9 @@ package com.example.transpiler.codeGenerator;
 
 import com.example.transpiler.lexer.Lexer;
 import com.example.transpiler.lexer.Token;
+import com.example.transpiler.syntaxer.GrammarChecker;
+import com.example.transpiler.syntaxer.Tree;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,7 +35,10 @@ public class JavaCodeGenerator {
         try {
             String stringWithSourceCode = getStringForFile(file);
             List<Token> tokens = Lexer.getTokensFromCode(stringWithSourceCode);
-            
+            Tree tree = GrammarChecker.checkGrammar(tokens);
+            ObjectMapper mapper = new ObjectMapper();
+            File treeFile = new File("Tree.json");
+            mapper.writeValue(treeFile, tree);
         }
         catch (IOException e) {
             log.error("No such file with name {}", file.getPath(), e);

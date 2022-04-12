@@ -3,11 +3,9 @@ package com.example.transpiler.syntaxer;
 import com.example.transpiler.lexer.Token;
 import com.example.transpiler.lexer.TokenType;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
-@RequiredArgsConstructor
 public class GrammarChecker {
 
     private List<Token> tokens;
