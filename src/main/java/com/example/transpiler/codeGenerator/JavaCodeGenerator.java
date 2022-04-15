@@ -39,6 +39,7 @@ public class JavaCodeGenerator {
             ObjectMapper mapper = new ObjectMapper();
             File treeFile = new File("Tree.json");
             mapper.writeValue(treeFile, tree);
+            ClassGenerator.generateClass(tree, type);
         }
         catch (IOException e) {
             log.error("No such file with name {}", file.getPath(), e);
