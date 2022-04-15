@@ -47,7 +47,7 @@ public class TranspilerConstruction {
         book.addField("String", "title");
         book.addField("Person", "author");
 
-        book.addConstructor(Modifier.PUBLIC)
+        book.addConstructor(Modifier.Keyword.PUBLIC)
             .addParameter("String", "title")
             .addParameter("Person", "author")
             .setBody(new BlockStmt()
@@ -60,10 +60,10 @@ public class TranspilerConstruction {
                              new NameExpr("author"),
                              AssignExpr.Operator.ASSIGN))));
 
-        book.addMethod("getTitle", Modifier.PUBLIC).setBody(
+        book.addMethod("getTitle", Modifier.Keyword.PUBLIC).setBody(
             new BlockStmt().addStatement(new ReturnStmt(new NameExpr("title"))));
 
-        book.addMethod("getAuthor", Modifier.PUBLIC).setBody(
+        book.addMethod("getAuthor", Modifier.Keyword.PUBLIC).setBody(
             new BlockStmt().addStatement(new ReturnStmt(new NameExpr("author"))));
 
         System.out.println(cu.toString());

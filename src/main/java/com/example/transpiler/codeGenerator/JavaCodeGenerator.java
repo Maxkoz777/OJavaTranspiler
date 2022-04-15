@@ -51,9 +51,4 @@ public class JavaCodeGenerator {
         return Files.readString(path);
     }
 
-    private enum ClassType {
-        LIBRARY,
-        SOURCE
-    }
-
 }
