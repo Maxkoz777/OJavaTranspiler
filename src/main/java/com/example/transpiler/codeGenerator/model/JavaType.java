@@ -1,6 +1,6 @@
 package com.example.transpiler.codeGenerator.model;
 
-public enum JvmType {
+public enum JavaType {
     REFERENCE,
     BOOLEAN,
     INTEGER,

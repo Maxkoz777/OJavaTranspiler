@@ -9,25 +9,25 @@ public class Variable {
     private String name;
     private String typeName;
     private Node expression;
-    private JvmType type;
+    private JavaType type;
     private String typeChar;
 
     private void defineType() {
         switch (typeName) {
             case "Integer":
-                type = JvmType.INTEGER;
+                type = JavaType.INTEGER;
                 typeChar = "I";
                 break;
             case "Real":
-                type = JvmType.REAL;
+                type = JavaType.REAL;
                 typeChar = "D";
                 break;
             case "Boolean":
-                type = JvmType.BOOLEAN;
+                type = JavaType.BOOLEAN;
                 typeChar = "B";
                 break;
             default:
-                type = JvmType.REFERENCE;
+                type = JavaType.REFERENCE;
                 typeChar = "A";
         }
     }
