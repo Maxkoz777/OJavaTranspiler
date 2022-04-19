@@ -42,6 +42,10 @@ public class TreeUtil {
         return new Pair<>(names.get(0), names.get(1));
     }
 
+    public Node getMainClassNode(Tree tree) {
+        return tree.getRoot().getChildNodes().get(0);
+    }
+
     /**
      *
      * @param node is a class node

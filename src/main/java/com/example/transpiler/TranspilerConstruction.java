@@ -5,6 +5,7 @@ import com.example.transpiler.util.TranspilerUtil;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.NameExpr;
@@ -60,8 +61,9 @@ public class TranspilerConstruction {
                              new NameExpr("author"),
                              AssignExpr.Operator.ASSIGN))));
 
-        book.addMethod("getTitle", Modifier.Keyword.PUBLIC).setBody(
-            new BlockStmt().addStatement(new ReturnStmt(new NameExpr("title"))));
+        book.addMethod("getTitle", Modifier.Keyword.PUBLIC);
+        BlockStmt blockStmt = new BlockStmt().addStatement(new ReturnStmt(new NameExpr("title")));
+        addMethod(cu, "Book", "getTitle", blockStmt);
 
         book.addMethod("getAuthor", Modifier.Keyword.PUBLIC).setBody(
             new BlockStmt().addStatement(new ReturnStmt(new NameExpr("author"))));
@@ -74,6 +76,13 @@ public class TranspilerConstruction {
         OutputStream out = new FileOutputStream(FILE_NAME);
         out.write(cu.toString().getBytes());
         out.close();
+    }
+
+    private static void addMethod(CompilationUnit cu, String className, String methodName, BlockStmt blockStmt) {
+        ClassOrInterfaceDeclaration classOrInterfaceDeclaration = cu.getClassByName(className).get();
+        MethodDeclaration methodDeclaration = classOrInterfaceDeclaration.getMethodsByName(methodName).get(0);
+        methodDeclaration.setBody(blockStmt);
+
     }
 
 }
