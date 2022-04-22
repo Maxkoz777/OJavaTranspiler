@@ -59,12 +59,12 @@ public class TreeUtil {
      * @param node is a class node
      * @return list of class variables
      */
-    public List<Variable> classVariables(Node node) {
+    public List<Variable> getClassVariables(Node node) {
         List<Node> variableNodes = node.getChildNodes().stream()
             .filter(isMember)
             .flatMap(convertToChildNodes)
             .filter(isVariableDeclaration)
-            .collect(Collectors.toList());
+            .toList();
         return variablesFromNodes(variableNodes);
     }
 

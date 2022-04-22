@@ -34,6 +34,9 @@ public class ClassGenerator {
             mainClass.addExtends(signature.getSecond());
         }
 
+        TreeUtil.getClassVariables(classNode)
+                .forEach(variable -> mainClass.addField(variable.getTypeName(), variable.getName()));
+
         TreeUtil.getConstructors(classNode)
             .forEach(constructor -> ConstructorGenerator.generateConstructor(cu, constructor));
 
