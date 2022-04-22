@@ -8,15 +8,16 @@ import lombok.Data;
 public class Constructor {
 
     private List<Variable> parameters;
-    private List<Variable> variables;
+    private List<Assignment> assignments;
     private String className = "";
     private Node body;
 
 
-    public Constructor(List<Variable> parameters, List<Variable> variables, Node body) {
+    public Constructor(List<Variable> parameters, List<Assignment> assignments, Node body, String className) {
         this.parameters = parameters;
-        this.variables = variables;
+        this.assignments = assignments;
         this.body = body;
+        this.className = className;
     }
 
 }

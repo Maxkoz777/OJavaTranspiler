@@ -1,5 +1,6 @@
 package com.example.transpiler.syntaxer;
 
+import com.example.transpiler.codeGenerator.model.Assignment;
 import com.example.transpiler.codeGenerator.model.Constructor;
 import com.example.transpiler.codeGenerator.model.Variable;
 import com.example.transpiler.util.Pair;
@@ -21,6 +22,8 @@ public class TreeUtil {
     private final Predicate<Node> isConstructor = node -> node.getType().equals(FormalGrammar.CONSTRUCTOR_DECLARATION);
     private final Predicate<Node> isParameterDeclaration = node -> node.getType().equals(FormalGrammar.PARAMETER_DECLARATION);
     private final Predicate<Node> isClassName = node -> node.getType().equals(FormalGrammar.CLASS_NAME);
+    private final Predicate<Node> isStatement = node -> node.getType().equals(FormalGrammar.STATEMENT);
+    private final Predicate<Node> isAssignment = node -> node.getType().equals(FormalGrammar.ASSIGNMENT);
     private final Function<Node, Stream<Node>> convertToChildNodes = nodes -> nodes.getChildNodes().stream();
 
     /**
@@ -95,6 +98,7 @@ public class TreeUtil {
      * @return list of all class constructors
      */
     public List<Constructor> getConstructors(Node node) {
+        String className = getClassNameForClassDeclarationNode(node);
         List<Constructor> constructors = new ArrayList<>();
         List<Node> constructorNodes = node.getChildNodes().stream()
             .filter(isMember)
@@ -105,17 +109,81 @@ public class TreeUtil {
             // Collecting parameters
             List<Variable> parameters = getParameters(cons.getChildNodes().get(0));
             Node body = cons.getChildNodes().get(1);
-            // Collecting Variable declarations inside constructor
-            List<Node> variableNodes = cons.getChildNodes().stream()
+            // Collecting Assignments declarations inside constructor
+            List<Node> assignments = cons.getChildNodes().get(1).getChildNodes().stream()
+                .filter(isStatement)
                 .flatMap(convertToChildNodes)
-                .filter(isVariableDeclaration)
+                .filter(isAssignment)
                 .collect(Collectors.toList());
-            List<Variable> declaredVariables = variablesFromNodes(variableNodes);
-            constructors.add(new Constructor(parameters, declaredVariables, body));
+            List<Assignment> declaredAssignments = assignmentsFromNodes(assignments);
+            constructors.add(new Constructor(parameters, declaredAssignments, body, className));
         }
         return constructors;
 
     }
+
+    private String getClassNameForClassDeclarationNode(Node node) {
+        if (node.getType() != FormalGrammar.CLASS_DECLARATION) {
+            throw new CompilationException("Analysed node is not a class declaration node");
+        }
+        return node.getChildNodes().stream()
+            .filter(isClassName)
+            .findFirst().get()
+            .getChildNodes().get(0)
+            .getValue();
+    }
+
+    private List<Assignment> assignmentsFromNodes(List<Node> assignments) {
+        List<Assignment> declaredAssignments = new ArrayList<>();
+        assignments.forEach(assignment ->
+                            {
+                                String varName = assignment.getChildNodes().get(0).getValue();
+                                String expression = expressionTypeToString(assignment.getChildNodes().get(1));
+                                declaredAssignments.add(new Assignment(
+                                    varName,
+                                    expression
+                                ));
+                            });
+        return declaredAssignments;
+    }
+
+    private String expressionTypeToString(Node node) {
+        if (node.getType() != FormalGrammar.EXPRESSION) {
+            throw new CompilationException("Analysed node is not a statement node");
+        }
+        List<Node> childNodes = node.getChildNodes();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < childNodes.size(); i++) {
+            Node child = childNodes.get(i);
+            switch (child.getType()) {
+                case PRIMARY -> {
+                    builder.append(child.getValue());
+                    if (i == childNodes.size() - 1) {
+                        break;
+                    } else {
+                        builder.append(".");
+                    }
+                }
+                case IDENTIFIER -> {
+                    builder.append(child.getValue());
+                    builder.append("(");
+                }
+                case ARGUMENTS -> {
+                    List<String> args = child.getChildNodes().stream()
+                        .map(ex -> ex.getChildNodes().get(0).getValue())
+                        .toList();
+                    builder.append(String.join(", ", args));
+                    builder.append(")");
+                    if (i != childNodes.size() - 1) {
+                        builder.append(".");
+                    }
+                }
+            }
+        }
+        return builder.toString();
+    }
+
+
 
     /**
      *

@@ -34,7 +34,8 @@ public class ClassGenerator {
             mainClass.addExtends(signature.getSecond());
         }
 
-        TreeUtil.getConstructors(classNode).forEach(ConstructorGenerator::generateConstructor);
+        TreeUtil.getConstructors(classNode)
+            .forEach(constructor -> ConstructorGenerator.generateConstructor(cu, constructor));
 
         generateCode(cu, classType, signature.getFirst());
 

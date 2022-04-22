@@ -2,6 +2,10 @@ class MathUtils is
   var Min : Integer
   var Max : Integer
 
+  this(bt : Integer) is
+      Max := bt.m(t, pt).n(k)
+  end
+
   method MaxInt(a: Array[Integer]) : Integer is
    var max : Integer.Min
    var i : Integer.get(1)
