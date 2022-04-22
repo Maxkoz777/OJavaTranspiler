@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.experimental.UtilityClass;
 
@@ -38,7 +37,7 @@ public class TreeUtil {
             .filter(node -> node.getType().equals(FormalGrammar.CLASS_NAME))
             .flatMap(convertToChildNodes)
             .map(Node::getValue)
-            .collect(Collectors.toList()));
+            .toList());
         if (names.size() == 1) {
             names.add(null);
         }
@@ -79,13 +78,13 @@ public class TreeUtil {
             .flatMap(convertToChildNodes)
             .filter(isIdentifier)
             .map(Node::getValue)
-            .collect(Collectors.toList());
+            .toList();
         List<String> types = variableNodes.stream()
             .flatMap(convertToChildNodes)
             .filter(isExpression)
             .flatMap(convertToChildNodes)
             .map(Node::getValue)
-            .collect(Collectors.toList());
+            .toList();
         for (int i = 0; i < variableNodes.size(); i++) {
             variables.add(new Variable(names.get(i), types.get(i)));
         }
@@ -104,7 +103,7 @@ public class TreeUtil {
             .filter(isMember)
             .flatMap(convertToChildNodes)
             .filter(isConstructor)
-            .collect(Collectors.toList());
+            .toList();
         for (Node cons : constructorNodes) {
             // Collecting parameters
             List<Variable> parameters = getParameters(cons.getChildNodes().get(0));
@@ -114,7 +113,7 @@ public class TreeUtil {
                 .filter(isStatement)
                 .flatMap(convertToChildNodes)
                 .filter(isAssignment)
-                .collect(Collectors.toList());
+                .toList();
             List<Assignment> declaredAssignments = assignmentsFromNodes(assignments);
             constructors.add(new Constructor(parameters, declaredAssignments, body, className));
         }
@@ -128,7 +127,7 @@ public class TreeUtil {
         }
         return node.getChildNodes().stream()
             .filter(isClassName)
-            .findFirst().get()
+            .findFirst().orElseThrow(() -> new CompilationException("Wrong AST construction"))
             .getChildNodes().get(0)
             .getValue();
     }
@@ -158,9 +157,7 @@ public class TreeUtil {
             switch (child.getType()) {
                 case PRIMARY -> {
                     builder.append(child.getValue());
-                    if (i == childNodes.size() - 1) {
-                        break;
-                    } else {
+                    if (i != childNodes.size() - 1) {
                         builder.append(".");
                     }
                 }
@@ -178,6 +175,7 @@ public class TreeUtil {
                         builder.append(".");
                     }
                 }
+                default -> throw new CompilationException("Unsupported AST type for expression");
             }
         }
         return builder.toString();
@@ -195,16 +193,16 @@ public class TreeUtil {
         List<Node> parameterDeclarations = cons.getChildNodes().stream()
             .filter(isParameterDeclaration)
             .flatMap(convertToChildNodes)
-            .collect(Collectors.toList());
+            .toList();
         List<String> parameterNames = parameterDeclarations.stream()
             .filter(isIdentifier)
             .map(Node::getValue)
-            .collect(Collectors.toList());
+            .toList();
         List<String> parameterTypes = parameterDeclarations.stream()
             .filter(isClassName)
             .flatMap(convertToChildNodes)
             .map(Node::getValue)
-            .collect(Collectors.toList());
+            .toList();
         for (int i = 0; i < parameterNames.size(); i++) {
             parameters.add(new Variable(parameterNames.get(i), parameterTypes.get(i)));
         }
