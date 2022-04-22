@@ -1,4 +1,4 @@
-class ClassName extends AnyValue is
+class MathUtils is
   var Min : Integer
   var Max : Integer
 

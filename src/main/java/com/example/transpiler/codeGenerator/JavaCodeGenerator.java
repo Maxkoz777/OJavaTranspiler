@@ -2,6 +2,8 @@ package com.example.transpiler.codeGenerator;
 
 import com.example.transpiler.lexer.Lexer;
 import com.example.transpiler.lexer.Token;
+import com.example.transpiler.lexer.TokenType;
+import com.example.transpiler.syntaxer.CompilationException;
 import com.example.transpiler.syntaxer.GrammarChecker;
 import com.example.transpiler.syntaxer.Tree;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,9 +37,13 @@ public class JavaCodeGenerator {
         try {
             String stringWithSourceCode = getStringForFile(file);
             List<Token> tokens = Lexer.getTokensFromCode(stringWithSourceCode);
+            String className = tokens.stream()
+                .filter(token -> token.getType().equals(TokenType.IDENTIFIER))
+                .map(Token::getLexeme)
+                .findFirst().orElseThrow(() -> new CompilationException("No name for class"));
             Tree tree = GrammarChecker.checkGrammar(tokens);
             ObjectMapper mapper = new ObjectMapper();
-            File treeFile = new File("Tree.json");
+            File treeFile = new File(className +  "Tree.json");
             mapper.writeValue(treeFile, tree);
             ClassGenerator.generateClass(tree, type);
         }

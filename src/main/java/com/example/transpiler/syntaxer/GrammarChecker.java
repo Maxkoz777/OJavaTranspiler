@@ -15,6 +15,7 @@ public class GrammarChecker {
     public Tree checkGrammar(List<Token> tokens) {
         GrammarChecker.tokens = tokens;
         tree = new Tree();
+        currentIndex = 0;
         while (true) {
             int validIndex = currentIndex;
             try {

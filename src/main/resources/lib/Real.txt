@@ -1,0 +1,2 @@
+class Real is
+end

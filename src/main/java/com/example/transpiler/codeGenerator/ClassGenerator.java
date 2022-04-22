@@ -36,7 +36,7 @@ public class ClassGenerator {
 
         TreeUtil.getConstructors(classNode).forEach(ConstructorGenerator::generateConstructor);
 
-//        generateCode(cu, classType, signature.getFirst());
+        generateCode(cu, classType, signature.getFirst());
 
     }
 
