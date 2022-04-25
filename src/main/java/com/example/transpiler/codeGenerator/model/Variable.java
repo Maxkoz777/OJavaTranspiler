@@ -8,27 +8,15 @@ public class Variable {
 
     private String name;
     private String typeName;
-    private Node expression;
+    private String expression;
     private JavaType type;
-    private String typeChar;
 
     private void defineType() {
         switch (typeName) {
-            case "Integer":
-                type = JavaType.INTEGER;
-                typeChar = "I";
-                break;
-            case "Real":
-                type = JavaType.REAL;
-                typeChar = "D";
-                break;
-            case "Boolean":
-                type = JavaType.BOOLEAN;
-                typeChar = "B";
-                break;
-            default:
-                type = JavaType.REFERENCE;
-                typeChar = "A";
+            case "Integer" -> type = JavaType.INTEGER;
+            case "Real"    -> type = JavaType.REAL;
+            case "Boolean" -> type = JavaType.BOOLEAN;
+            default        -> type = JavaType.REFERENCE;
         }
     }
 
@@ -38,8 +26,8 @@ public class Variable {
         defineType();
     }
 
-    public Variable(String name, Node expression) {
+    public Variable(String name, JavaType javaType) {
         this.name = name;
-        this.expression = expression;
+        this.type = javaType;
     }
 }

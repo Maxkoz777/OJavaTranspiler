@@ -2,10 +2,15 @@ package com.example.transpiler.syntaxer;
 
 import com.example.transpiler.codeGenerator.model.Assignment;
 import com.example.transpiler.codeGenerator.model.Constructor;
+import com.example.transpiler.codeGenerator.model.JavaType;
 import com.example.transpiler.codeGenerator.model.Variable;
+import com.example.transpiler.codeGenerator.model.VariableDeclaration;
+import com.example.transpiler.typeChecker.CheckUnit;
+import com.example.transpiler.typeChecker.TypeChecker;
 import com.example.transpiler.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -14,16 +19,17 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TreeUtil {
 
-    private final Predicate<Node> isVariableDeclaration = node -> node.getType().equals(FormalGrammar.VARIABLE_DECLARATION);
-    private final Predicate<Node> isIdentifier = node -> node.getType().equals(FormalGrammar.IDENTIFIER);
-    private final Predicate<Node> isExpression = node -> node.getType().equals(FormalGrammar.EXPRESSION);
-    private final Predicate<Node> isMember = node -> node.getType().equals(FormalGrammar.MEMBER_DECLARATION);
-    private final Predicate<Node> isConstructor = node -> node.getType().equals(FormalGrammar.CONSTRUCTOR_DECLARATION);
-    private final Predicate<Node> isParameterDeclaration = node -> node.getType().equals(FormalGrammar.PARAMETER_DECLARATION);
-    private final Predicate<Node> isClassName = node -> node.getType().equals(FormalGrammar.CLASS_NAME);
-    private final Predicate<Node> isStatement = node -> node.getType().equals(FormalGrammar.STATEMENT);
-    private final Predicate<Node> isAssignment = node -> node.getType().equals(FormalGrammar.ASSIGNMENT);
-    private final Function<Node, Stream<Node>> convertToChildNodes = nodes -> nodes.getChildNodes().stream();
+    public final Predicate<Node> isVariableDeclaration = node -> node.getType().equals(FormalGrammar.VARIABLE_DECLARATION);
+    public final Predicate<Node> isIdentifier = node -> node.getType().equals(FormalGrammar.IDENTIFIER);
+    public final Predicate<Node> isExpression = node -> node.getType().equals(FormalGrammar.EXPRESSION);
+    public final Predicate<Node> isMember = node -> node.getType().equals(FormalGrammar.MEMBER_DECLARATION);
+    public final Predicate<Node> isConstructor = node -> node.getType().equals(FormalGrammar.CONSTRUCTOR_DECLARATION);
+    public final Predicate<Node> isParameterDeclaration = node -> node.getType().equals(FormalGrammar.PARAMETER_DECLARATION);
+    public final Predicate<Node> isClassName = node -> node.getType().equals(FormalGrammar.CLASS_NAME);
+    public final Predicate<Node> isStatement = node -> node.getType().equals(FormalGrammar.STATEMENT);
+    public final Predicate<Node> isAssignment = node -> node.getType().equals(FormalGrammar.ASSIGNMENT);
+    public final Predicate<Node> isMethodDeclaration = node -> node.getType().equals(FormalGrammar.METHOD_DECLARATION);
+    public final Function<Node, Stream<Node>> convertToChildNodes = nodes -> nodes.getChildNodes().stream();
 
     /**
      *
@@ -207,6 +213,59 @@ public class TreeUtil {
             parameters.add(new Variable(parameterNames.get(i), parameterTypes.get(i)));
         }
         return parameters;
+    }
+
+    public List<Node> inOrderSearch (Tree tree, List<FormalGrammar> filters) {
+        List<Node> result = new ArrayList<>();
+        List<Node> nodes = tree.getRoot().getChildNodes();
+        result.addAll(nodes.stream().filter(node -> filters.contains(node.getType())).toList());
+        // todo add tree dfs traversal
+        return null;
+    }
+
+    private List<VariableDeclaration> getVariableDeclarationsFromNodes(List<Node> nodes) {
+        if (!nodes.stream().allMatch(isVariableDeclaration)) {
+            throw new CompilationException("Analysed node is not a variable declaration node");
+        }
+        List<VariableDeclaration> variableDeclarations = new ArrayList<>();
+        nodes.forEach(node -> {
+            String name = node.getChildNodes().get(0).getValue();
+            JavaType type = JavaType.UNDEFINED;
+            String evaluation = "";
+            Node expression = node.getChildNodes().get(1);
+            if (expression.getChildNodes().size() == 1) {
+                type = getTypeFromString(expression.getChildNodes().get(0).getValue());
+            }
+            else {
+                evaluation = expressionTypeToString(expression);
+            }
+            variableDeclarations.add(new VariableDeclaration(
+                name,
+                type,
+                evaluation
+            ));
+        });
+        return variableDeclarations;
+    }
+
+    private JavaType getTypeFromString(String type) {
+        return switch (type) {
+            case "Integer" -> JavaType.INTEGER;
+            case "Real" -> JavaType.REAL;
+            case "Boolean" -> JavaType.BOOLEAN;
+            default -> JavaType.UNDEFINED;
+        };
+    }
+
+    public CheckUnit getAllVariablesForProgram(Tree tree) {
+        List<Node> nodesForCheck = inOrderSearch(tree, List.of(FormalGrammar.ASSIGNMENT, FormalGrammar.VARIABLE_DECLARATION));
+        List<VariableDeclaration> declarations = getVariableDeclarationsFromNodes(nodesForCheck.stream()
+                                                                                      .filter(isVariableDeclaration)
+                                                                                      .toList());
+        List<Assignment> assignments = assignmentsFromNodes(nodesForCheck.stream()
+                                                                .filter(isAssignment)
+                                                                .toList());
+        return new CheckUnit(assignments, declarations);
     }
 
 }

@@ -4,5 +4,6 @@ public enum JavaType {
     REFERENCE,
     BOOLEAN,
     INTEGER,
-    REAL
+    REAL,
+    UNDEFINED
 }

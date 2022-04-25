@@ -6,6 +6,7 @@ import com.example.transpiler.lexer.TokenType;
 import com.example.transpiler.syntaxer.CompilationException;
 import com.example.transpiler.syntaxer.GrammarChecker;
 import com.example.transpiler.syntaxer.Tree;
+import com.example.transpiler.typeChecker.TypeChecker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +46,7 @@ public class JavaCodeGenerator {
             ObjectMapper mapper = new ObjectMapper();
             File treeFile = new File(className +  "Tree.json");
             mapper.writeValue(treeFile, tree);
+            TypeChecker.check(tree);
             ClassGenerator.generateClass(tree, type);
         }
         catch (IOException e) {

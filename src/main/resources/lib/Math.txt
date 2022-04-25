@@ -1,6 +1,7 @@
 class MathUtils is
   var Min : Integer
   var Max : Integer
+  var z : Integer.d(s)
 
   this(bt : Integer, ar : Integer) is
       Max := bt
