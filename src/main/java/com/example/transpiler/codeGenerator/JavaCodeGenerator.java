@@ -3,9 +3,7 @@ package com.example.transpiler.codeGenerator;
 import com.example.transpiler.lexer.Lexer;
 import com.example.transpiler.lexer.Token;
 import com.example.transpiler.lexer.TokenType;
-import com.example.transpiler.syntaxer.CompilationException;
-import com.example.transpiler.syntaxer.GrammarChecker;
-import com.example.transpiler.syntaxer.Tree;
+import com.example.transpiler.syntaxer.*;
 import com.example.transpiler.typeChecker.TypeChecker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -46,7 +44,8 @@ public class JavaCodeGenerator {
             ObjectMapper mapper = new ObjectMapper();
             File treeFile = new File(className +  "Tree.json");
             mapper.writeValue(treeFile, tree);
-            TypeChecker.check(tree);
+            //TypeChecker.check(tree);
+            System.out.println(TreeUtil.inOrderSearch(tree, List.of(FormalGrammar.VARIABLE_DECLARATION)));
             ClassGenerator.generateClass(tree, type);
         }
         catch (IOException e) {
