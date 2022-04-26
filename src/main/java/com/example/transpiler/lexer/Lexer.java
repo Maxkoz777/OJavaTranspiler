@@ -1,12 +1,14 @@
 package com.example.transpiler.lexer;
 
 import com.example.transpiler.util.Pair;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -17,8 +19,8 @@ public class Lexer {
     private static final char[] declarationSeparators = {';', '\n'};
 
     private static final List<String> operators = Arrays.asList("and", "or", "xor",
-                    "not", "<", "<=", ">", ">=", "=", "/=", "*", "/", "%",
-                    "+", "-", "[", "]", "(", ")", ":=", ":", ",", ".");
+            "not", "<", "<=", ">", ">=", "=", "/=", "*", "/", "%",
+            "+", "-", "[", "]", "(", ")", ":=", ":", ",", ".", "->", "{", "}");
 
     private static final List<String> keywords = Arrays.asList(
             "var", "is", "type", "end",
@@ -29,7 +31,6 @@ public class Lexer {
     public List<Token> getTokensFromCode(String program) throws InvalidTokenException {
         words = splitProgram(program);
         separateDeclarations(words);
-
         for (int order = 0; order < operators.size(); order++) {
             separateSymbolicOperators(words, order);
         }
@@ -95,8 +96,8 @@ public class Lexer {
 
     private List<Token> convertToTokens(List<String> words) throws InvalidTokenException {
         return words.stream()
-            .map(Lexer::resolveToken)
-            .collect(Collectors.toList());
+                .map(Lexer::resolveToken)
+                .collect(Collectors.toList());
     }
 
     private Token resolveToken(String word) throws InvalidTokenException {
@@ -119,20 +120,19 @@ public class Lexer {
         return false;
     }
 
-    private boolean isIdentifier(String word){
+    private boolean isIdentifier(String word) {
         return Pattern.matches("^[A-Za-z_][A-Za-z_0-9]*$", word);
     }
 
-    private boolean isLiteral(String word){
+    private boolean isLiteral(String word) {
         return isIntLiteral(word) || isRealLiteral(word);
     }
 
-    private boolean isIntLiteral(String str)  {
+    private boolean isIntLiteral(String str) {
         try {
             int value = Integer.parseInt(str);
             return value >= 0;
-        }
-        catch (NumberFormatException ignored) {
+        } catch (NumberFormatException ignored) {
             return false;
         }
     }
@@ -141,8 +141,7 @@ public class Lexer {
         try {
             var value = Float.parseFloat(str);
             return value >= 0f;
-        }
-        catch (NumberFormatException ignored) {
+        } catch (NumberFormatException ignored) {
             return false;
         }
     }
@@ -151,7 +150,7 @@ public class Lexer {
         program = program.replaceAll("\r\n", "\n");
 
         ArrayList<String> elements = new ArrayList<>(
-            Arrays.asList(program.split("[\\t\\n\\s]"))
+                Arrays.asList(program.split("[\\t\\n\\s]"))
         );
 
         separateDeclarations(elements);
@@ -177,10 +176,10 @@ public class Lexer {
         }
     }
 
-    private int getSeparatorIndex(String word){
+    private int getSeparatorIndex(String word) {
         var index = -1;
 
-        for (char separator: declarationSeparators) {
+        for (char separator : declarationSeparators) {
             var separatorIndex = word.indexOf(separator);
             if (separatorIndex == -1) continue;
             if (index != -1 && separatorIndex > index) continue;
