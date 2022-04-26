@@ -135,7 +135,7 @@ public class TreeUtil {
                 .getValue();
     }
 
-    private List<Assignment> assignmentsFromNodes(List<Node> assignments) {
+    public List<Assignment> assignmentsFromNodes(List<Node> assignments) {
         List<Assignment> declaredAssignments = new ArrayList<>();
         assignments.forEach(assignment ->
         {
@@ -143,7 +143,8 @@ public class TreeUtil {
             String expression = expressionTypeToString(assignment.getChildNodes().get(1));
             declaredAssignments.add(new Assignment(
                     varName,
-                    expression
+                    expression,
+                    assignment
             ));
         });
         return declaredAssignments;
@@ -215,18 +216,18 @@ public class TreeUtil {
         List<Node> nodes = tree.getRoot().getChildNodes();
         result.addAll(nodes.stream().filter(node -> filters.contains(node.getType())).toList());
         // todo add tree dfs traversal
-        TreeUtil.filteredNodes = new ArrayList<>();
+        filteredNodes = new ArrayList<>();
 
         findFilters(tree.getRoot(), filters);
 
         return filteredNodes;
     }
 
-    public static List<Node> filteredNodes;
+    private List<Node> filteredNodes;
 
     public void findFilters(Node node, List<FormalGrammar> filters) {
         if (filters.contains(node.getType())){
-            TreeUtil.filteredNodes.add(node);
+            filteredNodes.add(node);
         }
         List<Node> childNodes = node.getChildNodes();
         for (Node childNode: childNodes){
@@ -234,7 +235,7 @@ public class TreeUtil {
         }
     }
 
-    private List<VariableDeclaration> getVariableDeclarationsFromNodes(List<Node> nodes) {
+    public List<VariableDeclaration> getVariableDeclarationsFromNodes(List<Node> nodes) {
         if (!nodes.stream().allMatch(isVariableDeclaration)) {
             throw new CompilationException("Analysed node is not a variable declaration node");
         }

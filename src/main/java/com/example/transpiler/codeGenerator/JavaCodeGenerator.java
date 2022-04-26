@@ -44,8 +44,7 @@ public class JavaCodeGenerator {
             ObjectMapper mapper = new ObjectMapper();
             File treeFile = new File(className +  "Tree.json");
             mapper.writeValue(treeFile, tree);
-            //TypeChecker.check(tree);
-            System.out.println(TreeUtil.inOrderSearch(tree, List.of(FormalGrammar.VARIABLE_DECLARATION)));
+            TypeChecker.check(tree);
             ClassGenerator.generateClass(tree, type);
         }
         catch (IOException e) {

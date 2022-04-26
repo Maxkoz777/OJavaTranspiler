@@ -8,6 +8,9 @@ class MathUtils is
       Min := ar
   end
 
+  method empty() : Integer is
+  end
+
   method MaxInt(a: Array[Integer]) : Integer is
    var max : Integer.Min
    var i : Integer.get(1)

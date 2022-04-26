@@ -1,5 +1,6 @@
 package com.example.transpiler.util;
 
+import com.example.transpiler.typeChecker.TypeChecker;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
@@ -11,11 +12,15 @@ import lombok.experimental.UtilityClass;
 public class TranspilerUtil {
 
     public List<File> retrieveSourceLanguageFiles() {
-        return getResourceFolderFiles("sourceCode");
+        List<File> files = getResourceFolderFiles("sourceCode");
+        TypeChecker.treesCount += files.size();
+        return files;
     }
 
     public List<File> retrieveSourceLanguageLibraryFiles() {
-        return getResourceFolderFiles("lib");
+        List<File> files = getResourceFolderFiles("lib");
+        TypeChecker.treesCount += files.size();
+        return files;
     }
 
     private List<File> getResourceFolderFiles (String folder) {
