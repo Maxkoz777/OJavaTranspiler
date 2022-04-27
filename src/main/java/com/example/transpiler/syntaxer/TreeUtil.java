@@ -3,6 +3,7 @@ package com.example.transpiler.syntaxer;
 import com.example.transpiler.codeGenerator.model.Assignment;
 import com.example.transpiler.codeGenerator.model.Constructor;
 import com.example.transpiler.codeGenerator.model.JavaType;
+import com.example.transpiler.codeGenerator.model.Method;
 import com.example.transpiler.codeGenerator.model.Variable;
 import com.example.transpiler.codeGenerator.model.VariableDeclaration;
 import com.example.transpiler.typeChecker.CheckUnit;
@@ -279,4 +280,19 @@ public class TreeUtil {
         return new CheckUnit(assignments, declarations);
     }
 
+    public List<Method> getMethods(Node classNode) {
+        // todo for provided class-node return list of all nodes with methodDeclaration type
+        // method returns List of Methods therefore leave "return null;" as it is and I will implement mapping
+        // from nodes you retrieved to the method-model
+        return null;
+    }
+
+    public Node getNodeScope(Tree tree, Node node) {
+        // todo         for given tree and node inside it return the scope for the provided node, where this variable is used
+        // todo         i.e. for classVariable it is classDeclaration, for variableDeclaration inside method - outer method
+        // todo         so main scopes are the following: classDeclaration, methodDeclaration, constructorDeclaration
+        // I suppose the idea is to iterate through all parents of node in tree from the nearest to more general ones
+        // and when we find any of {classDeclaration, methodDeclaration, constructorDeclaration} return it immediately
+        return null;
+    }
 }

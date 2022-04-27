@@ -40,6 +40,11 @@ public class ClassGenerator {
         TreeUtil.getConstructors(classNode)
             .forEach(constructor -> ConstructorGenerator.generateConstructor(cu, constructor));
 
+        // todo implement full logic for inner method parts
+
+        TreeUtil.getMethods(classNode)
+                .forEach(method -> MethodGenerator.generateMethod(cu, method));
+
         generateCode(cu, classType, signature.getFirst());
 
     }
