@@ -1,0 +1,20 @@
+class Boolean is
+
+ this(d:Boolean) is
+ end
+
+ method toInteger() : Integer is
+ end
+
+ method Or(p: Boolean) : Boolean is
+ end
+
+ method And(p: Boolean) : Boolean is
+ end
+
+ method Xor(p: Boolean) : Boolean is
+ end
+
+ method Not() : Boolean is
+ end
+end

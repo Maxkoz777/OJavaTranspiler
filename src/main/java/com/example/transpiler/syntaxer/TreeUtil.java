@@ -216,7 +216,6 @@ public class TreeUtil {
         List<Node> result = new ArrayList<>();
         List<Node> nodes = tree.getRoot().getChildNodes();
         result.addAll(nodes.stream().filter(node -> filters.contains(node.getType())).toList());
-        // todo add tree dfs traversal
         filteredNodes = new ArrayList<>();
 
         findFilters(tree.getRoot(), filters);
@@ -224,14 +223,14 @@ public class TreeUtil {
         return filteredNodes;
     }
 
-    private List<Node> filteredNodes;
+    public List<Node> filteredNodes;
 
     public void findFilters(Node node, List<FormalGrammar> filters) {
-        if (filters.contains(node.getType())){
+        if (filters.contains(node.getType())) {
             filteredNodes.add(node);
         }
         List<Node> childNodes = node.getChildNodes();
-        for (Node childNode: childNodes){
+        for (Node childNode : childNodes) {
             findFilters(childNode, filters);
         }
     }
@@ -284,15 +283,50 @@ public class TreeUtil {
         // todo for provided class-node return list of all nodes with methodDeclaration type
         // method returns List of Methods therefore leave "return null;" as it is and I will implement mapping
         // from nodes you retrieved to the method-model
+        List<Node> nodes = new ArrayList<>();
+
+
         return null;
     }
 
+    public Node scope;
+
+
     public Node getNodeScope(Tree tree, Node node) {
+        System.out.println("target");
+        System.out.println(node);
         // todo         for given tree and node inside it return the scope for the provided node, where this variable is used
         // todo         i.e. for classVariable it is classDeclaration, for variableDeclaration inside method - outer method
         // todo         so main scopes are the following: classDeclaration, methodDeclaration, constructorDeclaration
         // I suppose the idea is to iterate through all parents of node in tree from the nearest to more general ones
         // and when we find any of {classDeclaration, methodDeclaration, constructorDeclaration} return it immediately
+        scope = null;
+        Node res = findNode(tree.getRoot(), node);
+        System.out.println("res");
+        return res;
+    }
+
+    public Node findNode(Node n, Node s) {
+        if (n == s) {
+            return scope;
+        } else {
+            List<FormalGrammar> declarations = List.of(
+                    FormalGrammar.METHOD_DECLARATION,
+                    FormalGrammar.CLASS_DECLARATION,
+                    FormalGrammar.CONSTRUCTOR_DECLARATION
+            );
+            if (declarations.contains(n.getType())) {
+                scope = n;
+            }
+
+            for (Node child: n.getChildNodes()) {
+                Node result = findNode(child, s);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
         return null;
     }
+
 }
