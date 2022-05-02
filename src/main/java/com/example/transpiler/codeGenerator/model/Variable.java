@@ -10,6 +10,7 @@ public class Variable {
     private String typeName;
     private String expression;
     private JavaType type;
+    private Node declarationNode;
 
     private void defineType() {
         switch (typeName) {

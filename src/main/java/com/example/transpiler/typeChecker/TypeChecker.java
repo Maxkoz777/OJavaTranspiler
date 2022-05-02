@@ -22,10 +22,12 @@ public class TypeChecker {
 
     public int treesCount = 0;
     private List<Tree> trees = new ArrayList<>();
+    private Tree currentTree;
     private boolean isTreeArrayReady = false;
     private List<DebtVariable> variablesToCheck = new ArrayList<>();
 
     public void check(Tree tree) {
+        currentTree = tree;
         trees.add(tree);
         checkIfReadyToParseAllVariables();
         processCheckUnitForClass(TreeUtil.getAllVariablesForProgram(tree));
@@ -47,8 +49,9 @@ public class TypeChecker {
                     variableDeclaration.getType()
                 );
                 if (variableDeclaration.getType().equals(JavaType.UNDEFINED)) {
-                    variable.setExpression(variable.getExpression());
+                    variable.setExpression(variableDeclaration.getExpression());
                 }
+                variable.setDeclarationNode(variableDeclaration.getNode());
                 return variable;
             })
             .toList();
@@ -82,9 +85,9 @@ public class TypeChecker {
 
     }
 
-    private String typeForExpressionWithTypes(Pair<String, ExpressionResult> pair, String name) {
-        ExpressionResult expressionResult = pair.getSecond();
-        String expression = pair.getFirst();
+    private String typeForExpressionWithTypes(VariableExpression variableExpression, String name) {
+        ExpressionResult expressionResult = variableExpression.getType();
+        String expression = variableExpression.getTerm();
         List<FormalGrammar> filter;
         boolean isVariable = expressionResult.equals(ExpressionResult.VARIABLE);
         if (isVariable) {
@@ -163,17 +166,19 @@ public class TypeChecker {
     private void populateDebtVariables(Variable variable, List<String> expressions) {
         DebtVariable debtVariable = new DebtVariable(
             variable.getName(),
-            expressions.stream().map(TypeChecker::getNameWithTypeOfExpression).toList()
+            currentTree,
+            expressions.stream().map(TypeChecker::getNameWithTypeOfExpression).toList(),
+            variable.getDeclarationNode()
         );
         variablesToCheck.add(debtVariable);
     }
 
-    private Pair<String, ExpressionResult> getNameWithTypeOfExpression(String expression) {
+    private VariableExpression getNameWithTypeOfExpression(String expression) {
         String[] elements = expression.split("\\.");
         String lastTerm = elements[elements.length - 1];
         ExpressionResult result = !lastTerm.contains("(") ? ExpressionResult.VARIABLE : ExpressionResult.METHOD;
         String name = result.equals(ExpressionResult.METHOD) ? lastTerm.substring(0, lastTerm.indexOf("(")) : lastTerm;
-        return new Pair<>(name, result);
+        return new VariableExpression(name, result, expression);
     }
 
     private final Predicate<Pair<Variable, Long>> isNotStrictlyDefined = pair -> pair.getSecond() > 0;
