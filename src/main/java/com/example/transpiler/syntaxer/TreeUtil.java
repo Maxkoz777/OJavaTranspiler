@@ -290,21 +290,12 @@ public class TreeUtil {
         return null;
     }
 
-    public Node scope;
-
-
     public Node getNodeScope(Tree tree, Node node) {
-        // todo         for given tree and node inside it return the scope for the provided node, where this variable is used
-        // todo         i.e. for classVariable it is classDeclaration, for variableDeclaration inside method - outer method
-        // todo         so main scopes are the following: classDeclaration, methodDeclaration, constructorDeclaration
-        // I suppose the idea is to iterate through all parents of node in tree from the nearest to more general ones
-        // and when we find any of {classDeclaration, methodDeclaration, constructorDeclaration} return it immediately
-        scope = null;
-        Node res = findNode(tree.getRoot(), node, null);
+        Node res = findNodeScope(tree.getRoot (), node, null);
         return res;
     }
 
-    public Node findNode(Node n, Node s, Node currentScope) {
+    public Node findNodeScope(Node n, Node s, Node currentScope) {
         if (n == s) {
             return currentScope;
         } else {
@@ -319,7 +310,7 @@ public class TreeUtil {
             }
 
             for (Node child: n.getChildNodes()) {
-                Node result = findNode(child, s, currentScope);
+                Node result = findNodeScope(child, s, currentScope);
                 if (result != null) {
                     return result;
                 }
