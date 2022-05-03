@@ -253,7 +253,8 @@ public class TreeUtil {
             variableDeclarations.add(new VariableDeclaration(
                     name,
                     type,
-                    evaluation
+                    evaluation,
+                    node
             ));
         });
         return variableDeclarations;
