@@ -1,10 +1,6 @@
 package com.example.transpiler.syntaxer;
 
-import com.example.transpiler.codeGenerator.model.Assignment;
-import com.example.transpiler.codeGenerator.model.Constructor;
-import com.example.transpiler.codeGenerator.model.JavaType;
-import com.example.transpiler.codeGenerator.model.Variable;
-import com.example.transpiler.codeGenerator.model.VariableDeclaration;
+import com.example.transpiler.codeGenerator.model.*;
 import com.example.transpiler.typeChecker.CheckUnit;
 import com.example.transpiler.util.Pair;
 
@@ -12,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import lombok.experimental.UtilityClass;
@@ -24,7 +21,11 @@ public class TreeUtil {
     public final Predicate<Node> isExpression = node -> node.getType().equals(FormalGrammar.EXPRESSION);
     public final Predicate<Node> isMember = node -> node.getType().equals(FormalGrammar.MEMBER_DECLARATION);
     public final Predicate<Node> isConstructor = node -> node.getType().equals(FormalGrammar.CONSTRUCTOR_DECLARATION);
+    public final Predicate<Node> isBody = node -> node.getType().equals(FormalGrammar.BODY);
+
     public final Predicate<Node> isParameterDeclaration = node -> node.getType().equals(FormalGrammar.PARAMETER_DECLARATION);
+
+    public final Predicate<Node> isParameters = node -> node.getType().equals(FormalGrammar.PARAMETERS);
     public final Predicate<Node> isClassName = node -> node.getType().equals(FormalGrammar.CLASS_NAME);
     public final Predicate<Node> isStatement = node -> node.getType().equals(FormalGrammar.STATEMENT);
     public final Predicate<Node> isAssignment = node -> node.getType().equals(FormalGrammar.ASSIGNMENT);
@@ -277,18 +278,54 @@ public class TreeUtil {
         return new CheckUnit(assignments, declarations);
     }
 
-    public static ArrayList<Node> methods;
-    public ArrayList<Node> getMethods(Node classNode) {
-        System.out.println(classNode);
+//    public static ArrayList<Node> methods;
+//    public ArrayList<Node> getMethods(Node classNode) {
+//        System.out.println(classNode);
+//
+//        filteredNodes = new ArrayList<Node>();
+//        List<FormalGrammar> filters = new ArrayList<FormalGrammar>();
+//        filters.add(FormalGrammar.METHOD_DECLARATION);
+//        findFilters(classNode, filters);
+//
+//        return (ArrayList<Node>) filteredNodes;
+//
+//    }
 
-        filteredNodes = new ArrayList<Node>();
-        List<FormalGrammar> filters = new ArrayList<FormalGrammar>();
-        filters.add(FormalGrammar.METHOD_DECLARATION);
-        findFilters(classNode, filters);
 
-        return (ArrayList<Node>) filteredNodes;
+    public static ArrayList<Method> classMethods;
 
+    public ArrayList<Method> getClassMethods(Node classNode){
+        classMethods = new  ArrayList<Method>();
+        for (Node node: classNode.getChildNodes()){
+            if (node.getType()==FormalGrammar.MEMBER_DECLARATION){
+               if (node.getChildNodes().get(0).getType() == FormalGrammar.METHOD_DECLARATION){
+                   Node methodNode = node.getChildNodes().get(0);
+                   String methodName = methodNode.getChildNodes().get(0).getValue();
+                   List<Node> methodParamsNodeList = methodNode.getChildNodes()
+                           .stream()
+                           .filter(isParameters).toList();
+                   Node paramNode = methodParamsNodeList.isEmpty()? null: methodParamsNodeList.get(0);
+
+                   List<Node> methodBodyNodeList = methodNode.getChildNodes()
+                           .stream()
+                           .filter(isBody).toList();
+                   Node bodyNode = methodBodyNodeList.isEmpty()? null: methodBodyNodeList.get(0);
+
+                   List<Node> methodIdentifierList = methodNode.getChildNodes()
+                           .stream()
+                           .filter(isIdentifier).toList();
+                   String identifier = methodIdentifierList.isEmpty()? null: methodIdentifierList.get(0).getValue();
+
+
+
+                   Method method = new Method(methodName, paramNode,identifier, bodyNode );
+                   classMethods.add(method);
+               }
+            }
+        }
+        return classMethods;
     }
+
 
     public Node getNodeScope(Tree tree, Node node) {
         Node res = findNodeScope(tree.getRoot (), node, null);
@@ -318,5 +355,10 @@ public class TreeUtil {
         }
         return null;
     }
+
+//    public String getMethodReturnType(Node methodNode){
+//        System.out.println(methodNode.getChildNodes());
+//        return "val";
+//    }
 
 }
