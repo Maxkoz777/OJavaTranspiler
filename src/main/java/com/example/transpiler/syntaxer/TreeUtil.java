@@ -3,16 +3,13 @@ package com.example.transpiler.syntaxer;
 import com.example.transpiler.codeGenerator.model.Assignment;
 import com.example.transpiler.codeGenerator.model.Constructor;
 import com.example.transpiler.codeGenerator.model.JavaType;
-import com.example.transpiler.codeGenerator.model.Method;
 import com.example.transpiler.codeGenerator.model.Variable;
 import com.example.transpiler.codeGenerator.model.VariableDeclaration;
 import com.example.transpiler.typeChecker.CheckUnit;
-import com.example.transpiler.typeChecker.TypeChecker;
 import com.example.transpiler.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -280,14 +277,17 @@ public class TreeUtil {
         return new CheckUnit(assignments, declarations);
     }
 
-    public List<Method> getMethods(Node classNode) {
-        // todo for provided class-node return list of all nodes with methodDeclaration type
-        // method returns List of Methods therefore leave "return null;" as it is and I will implement mapping
-        // from nodes you retrieved to the method-model
-        List<Node> nodes = new ArrayList<>();
+    public static ArrayList<Node> methods;
+    public ArrayList<Node> getMethods(Node classNode) {
+        System.out.println(classNode);
 
+        filteredNodes = new ArrayList<Node>();
+        List<FormalGrammar> filters = new ArrayList<FormalGrammar>();
+        filters.add(FormalGrammar.METHOD_DECLARATION);
+        findFilters(classNode, filters);
 
-        return null;
+        return (ArrayList<Node>) filteredNodes;
+
     }
 
     public Node getNodeScope(Tree tree, Node node) {
