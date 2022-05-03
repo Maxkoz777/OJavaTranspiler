@@ -42,8 +42,8 @@ public class ClassGenerator {
 
         // todo implement full logic for inner method parts
 
-        TreeUtil.getMethods(classNode)
-                .forEach(method -> MethodGenerator.generateMethod(cu, method));
+//        TreeUtil.getMethods(classNode)
+//                .forEach(method -> MethodGenerator.generateMethod(cu, method));
 
         generateCode(cu, classType, signature.getFirst());
 

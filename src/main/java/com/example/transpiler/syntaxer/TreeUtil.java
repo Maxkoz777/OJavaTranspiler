@@ -293,34 +293,32 @@ public class TreeUtil {
 
 
     public Node getNodeScope(Tree tree, Node node) {
-        System.out.println("target");
-        System.out.println(node);
         // todo         for given tree and node inside it return the scope for the provided node, where this variable is used
         // todo         i.e. for classVariable it is classDeclaration, for variableDeclaration inside method - outer method
         // todo         so main scopes are the following: classDeclaration, methodDeclaration, constructorDeclaration
         // I suppose the idea is to iterate through all parents of node in tree from the nearest to more general ones
         // and when we find any of {classDeclaration, methodDeclaration, constructorDeclaration} return it immediately
         scope = null;
-        Node res = findNode(tree.getRoot(), node);
-        System.out.println("res");
+        Node res = findNode(tree.getRoot(), node, null);
         return res;
     }
 
-    public Node findNode(Node n, Node s) {
+    public Node findNode(Node n, Node s, Node currentScope) {
         if (n == s) {
-            return scope;
+            return currentScope;
         } else {
             List<FormalGrammar> declarations = List.of(
                     FormalGrammar.METHOD_DECLARATION,
                     FormalGrammar.CLASS_DECLARATION,
-                    FormalGrammar.CONSTRUCTOR_DECLARATION
+                    FormalGrammar.CONSTRUCTOR_DECLARATION,
+                    FormalGrammar.MEMBER_DECLARATION
             );
             if (declarations.contains(n.getType())) {
-                scope = n;
+                currentScope = n;
             }
 
             for (Node child: n.getChildNodes()) {
-                Node result = findNode(child, s);
+                Node result = findNode(child, s, currentScope);
                 if (result != null) {
                     return result;
                 }
