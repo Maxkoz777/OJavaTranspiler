@@ -1,7 +1,9 @@
 package com.example.transpiler.typeChecker;
 
 import com.example.transpiler.codeGenerator.model.Assignment;
+import com.example.transpiler.codeGenerator.model.ClassDeclaration;
 import com.example.transpiler.codeGenerator.model.JavaType;
+import com.example.transpiler.codeGenerator.model.Method;
 import com.example.transpiler.codeGenerator.model.Variable;
 import com.example.transpiler.codeGenerator.model.VariableDeclaration;
 import com.example.transpiler.syntaxer.FormalGrammar;
@@ -10,8 +12,10 @@ import com.example.transpiler.syntaxer.Tree;
 import com.example.transpiler.syntaxer.TreeUtil;
 import com.example.transpiler.util.Pair;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -22,16 +26,34 @@ public class TypeChecker {
 
     public int treesCount = 0;
     private List<Tree> trees = new ArrayList<>();
-    private Tree currentTree;
+    private List<ClassDeclaration> classDeclarations = new ArrayList<>();
     private boolean isTreeArrayReady = false;
     private List<DebtVariable> variablesToCheck = new ArrayList<>();
+    private Tree currentTree;
+
+    // Maps will consume memory, but we will have linear search for types among classes
+    // instead of O(n^2)
+
+    private Map<ClassDeclaration, List<Variable>> classAtributesMap = new HashMap<>();
+    private Map<ClassDeclaration, List<Method>> classMethodsMap = new HashMap<>();
 
     public void check(Tree tree) {
-        currentTree = tree;
-        trees.add(tree);
+
+        analyseTree(tree);
         checkIfReadyToParseAllVariables();
         processCheckUnitForClass(TreeUtil.getAllVariablesForProgram(tree));
 
+    }
+
+    private void analyseTree(Tree tree) {
+        trees.add(tree);
+        List<Node> classNodes = TreeUtil.inOrderSearch(tree, List.of(FormalGrammar.CLASS_DECLARATION));
+        classNodes.forEach(node -> {
+            ClassDeclaration classDeclaration = new ClassDeclaration(node);
+            classDeclarations.add(classDeclaration);
+//            classAtributesMap.put(classDeclaration, TreeUtil.);
+//            classMethodsMap.put(classDeclaration, TreeUtil.);
+        });
     }
 
     private void checkIfReadyToParseAllVariables() {
@@ -69,7 +91,7 @@ public class TypeChecker {
     private void majorCheck() {
         variablesToCheck.forEach(debtVariable -> {
             Set<String> types = debtVariable.getExpressionsWithTypes().stream()
-                .map(x -> TypeChecker.typeForExpressionWithTypes(x, debtVariable.getName()))
+                .map(x -> TypeChecker.typeForExpressionWithTypes(x, debtVariable))
                 .collect(Collectors.toSet());
             if (types.size() > 1) {
                 throw new TypeCheckerException(
@@ -85,9 +107,25 @@ public class TypeChecker {
 
     }
 
-    private String typeForExpressionWithTypes(VariableExpression variableExpression, String name) {
+    private String recursiveTypeExtraction(VariableExpression variableExpression, ClassDeclaration classDeclaration, Node initDeclaration) {
         ExpressionResult expressionResult = variableExpression.getType();
-        String expression = variableExpression.getTerm();
+        String shortExpression = variableExpression.getTerm();
+        String expression = variableExpression.getWholeExpression();
+        String type = "";
+
+        return type;
+    }
+
+    private String typeForExpressionWithTypes(VariableExpression variableExpression, DebtVariable debtVariable) {
+        ExpressionResult expressionResult = variableExpression.getType();
+        String shortExpression = variableExpression.getTerm();
+        String expression = variableExpression.getWholeExpression();
+        String type;
+        if (shortExpression.length() != expression.length()) {
+//            Node classNode = TreeUtil. - get class node for variable declaration and tree
+//            ClassDeclaration classDeclaration = new ClassDeclaration(classNode);
+//            type = recursiveTypeExtraction(variableExpression, classDeclaration, debtVariable.getDeclarationNode());
+        }
         List<FormalGrammar> filter;
         boolean isVariable = expressionResult.equals(ExpressionResult.VARIABLE);
         if (isVariable) {
@@ -98,9 +136,9 @@ public class TypeChecker {
         List<Node> nodes = new ArrayList<>();
         trees.forEach(tree -> nodes.addAll(TreeUtil.inOrderSearch(tree, filter)));
         if (isVariable) {
-            return typeForVariableDeclaration(nodes, expression, name);
+            return typeForVariableDeclaration(nodes, shortExpression, debtVariable.getName());
         } else {
-            return typeForMethodDeclaration(nodes, expression);
+            return typeForMethodDeclaration(nodes, shortExpression);
         }
     }
 

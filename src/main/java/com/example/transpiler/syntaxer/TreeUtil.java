@@ -125,7 +125,7 @@ public class TreeUtil {
 
     }
 
-    private String getClassNameForClassDeclarationNode(Node node) {
+    public String getClassNameForClassDeclarationNode(Node node) {
         if (node.getType() != FormalGrammar.CLASS_DECLARATION) {
             throw new CompilationException("Analysed node is not a class declaration node");
         }

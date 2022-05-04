@@ -22,7 +22,7 @@ public class JavaCodeGenerator {
     // public contract
 
     public void generateJavaSourceFile(File file) {
-//        generateJavaCodeForClass(file, ClassType.SOURCE);
+        generateJavaCodeForClass(file, ClassType.SOURCE);
     }
 
     public void generateJavaLibFile(File file) {
@@ -44,7 +44,7 @@ public class JavaCodeGenerator {
             ObjectMapper mapper = new ObjectMapper();
             File treeFile = new File(className +  "Tree.json");
             mapper.writeValue(treeFile, tree);
-            //TypeChecker.check(tree);
+//            TypeChecker.check(tree);
             ClassGenerator.generateClass(tree, type);
         }
         catch (IOException e) {

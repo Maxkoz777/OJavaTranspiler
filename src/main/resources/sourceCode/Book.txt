@@ -1,1 +1,2 @@
-book text
+class Book is
+end
