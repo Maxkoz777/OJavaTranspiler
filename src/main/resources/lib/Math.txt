@@ -8,7 +8,7 @@ class MathUtils is
       Min := ar
   end
 
-  method empty() : Integer is
+  method empty(bt : Integer, ar : Integer) : Integer is
   end
 
   method MaxInt(a: Array[Integer]) : Integer is

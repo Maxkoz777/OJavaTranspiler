@@ -1,20 +1,14 @@
 package com.example.transpiler.syntaxer;
 
-import com.example.transpiler.codeGenerator.model.Assignment;
-import com.example.transpiler.codeGenerator.model.Constructor;
-import com.example.transpiler.codeGenerator.model.JavaType;
-import com.example.transpiler.codeGenerator.model.Method;
-import com.example.transpiler.codeGenerator.model.Variable;
-import com.example.transpiler.codeGenerator.model.VariableDeclaration;
+import com.example.transpiler.codeGenerator.model.*;
 import com.example.transpiler.typeChecker.CheckUnit;
-import com.example.transpiler.typeChecker.TypeChecker;
 import com.example.transpiler.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import lombok.experimental.UtilityClass;
@@ -27,7 +21,11 @@ public class TreeUtil {
     public final Predicate<Node> isExpression = node -> node.getType().equals(FormalGrammar.EXPRESSION);
     public final Predicate<Node> isMember = node -> node.getType().equals(FormalGrammar.MEMBER_DECLARATION);
     public final Predicate<Node> isConstructor = node -> node.getType().equals(FormalGrammar.CONSTRUCTOR_DECLARATION);
+    public final Predicate<Node> isBody = node -> node.getType().equals(FormalGrammar.BODY);
+
     public final Predicate<Node> isParameterDeclaration = node -> node.getType().equals(FormalGrammar.PARAMETER_DECLARATION);
+
+    public final Predicate<Node> isParameters = node -> node.getType().equals(FormalGrammar.PARAMETERS);
     public final Predicate<Node> isClassName = node -> node.getType().equals(FormalGrammar.CLASS_NAME);
     public final Predicate<Node> isStatement = node -> node.getType().equals(FormalGrammar.STATEMENT);
     public final Predicate<Node> isAssignment = node -> node.getType().equals(FormalGrammar.ASSIGNMENT);
@@ -280,48 +278,76 @@ public class TreeUtil {
         return new CheckUnit(assignments, declarations);
     }
 
-    public List<Method> getMethods(Node classNode) {
-        // todo for provided class-node return list of all nodes with methodDeclaration type
-        // method returns List of Methods therefore leave "return null;" as it is and I will implement mapping
-        // from nodes you retrieved to the method-model
-        List<Node> nodes = new ArrayList<>();
+//    public static ArrayList<Node> methods;
+//    public ArrayList<Node> getMethods(Node classNode) {
+//        System.out.println(classNode);
+//
+//        filteredNodes = new ArrayList<Node>();
+//        List<FormalGrammar> filters = new ArrayList<FormalGrammar>();
+//        filters.add(FormalGrammar.METHOD_DECLARATION);
+//        findFilters(classNode, filters);
+//
+//        return (ArrayList<Node>) filteredNodes;
+//
+//    }
 
 
-        return null;
+    public static ArrayList<Method> classMethods;
+
+    public ArrayList<Method> getClassMethods(Node classNode){
+        classMethods = new  ArrayList<Method>();
+        for (Node node: classNode.getChildNodes()){
+            if (node.getType()==FormalGrammar.MEMBER_DECLARATION){
+               if (node.getChildNodes().get(0).getType() == FormalGrammar.METHOD_DECLARATION){
+                   Node methodNode = node.getChildNodes().get(0);
+                   String methodName = methodNode.getChildNodes().get(0).getValue();
+                   List<Node> methodParamsNodeList = methodNode.getChildNodes()
+                           .stream()
+                           .filter(isParameters).toList();
+                   Node paramNode = methodParamsNodeList.isEmpty()? null: methodParamsNodeList.get(0);
+
+                   List<Node> methodBodyNodeList = methodNode.getChildNodes()
+                           .stream()
+                           .filter(isBody).toList();
+                   Node bodyNode = methodBodyNodeList.isEmpty()? null: methodBodyNodeList.get(0);
+
+                   List<Node> methodIdentifierList = methodNode.getChildNodes()
+                           .stream()
+                           .filter(isIdentifier).toList();
+                   String identifier = methodIdentifierList.isEmpty()? null: methodIdentifierList.get(0).getValue();
+
+
+
+                   Method method = new Method(methodName, paramNode,identifier, bodyNode );
+                   classMethods.add(method);
+               }
+            }
+        }
+        return classMethods;
     }
-
-    public Node scope;
 
 
     public Node getNodeScope(Tree tree, Node node) {
-        System.out.println("target");
-        System.out.println(node);
-        // todo         for given tree and node inside it return the scope for the provided node, where this variable is used
-        // todo         i.e. for classVariable it is classDeclaration, for variableDeclaration inside method - outer method
-        // todo         so main scopes are the following: classDeclaration, methodDeclaration, constructorDeclaration
-        // I suppose the idea is to iterate through all parents of node in tree from the nearest to more general ones
-        // and when we find any of {classDeclaration, methodDeclaration, constructorDeclaration} return it immediately
-        scope = null;
-        Node res = findNode(tree.getRoot(), node);
-        System.out.println("res");
+        Node res = findNodeScope(tree.getRoot (), node, null);
         return res;
     }
 
-    public Node findNode(Node n, Node s) {
+    public Node findNodeScope(Node n, Node s, Node currentScope) {
         if (n == s) {
-            return scope;
+            return currentScope;
         } else {
             List<FormalGrammar> declarations = List.of(
                     FormalGrammar.METHOD_DECLARATION,
                     FormalGrammar.CLASS_DECLARATION,
-                    FormalGrammar.CONSTRUCTOR_DECLARATION
+                    FormalGrammar.CONSTRUCTOR_DECLARATION,
+                    FormalGrammar.MEMBER_DECLARATION
             );
             if (declarations.contains(n.getType())) {
-                scope = n;
+                currentScope = n;
             }
 
             for (Node child: n.getChildNodes()) {
-                Node result = findNode(child, s);
+                Node result = findNodeScope(child, s, currentScope);
                 if (result != null) {
                     return result;
                 }
@@ -329,5 +355,10 @@ public class TreeUtil {
         }
         return null;
     }
+
+//    public String getMethodReturnType(Node methodNode){
+//        System.out.println(methodNode.getChildNodes());
+//        return "val";
+//    }
 
 }

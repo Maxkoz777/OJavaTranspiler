@@ -1,0 +1,203 @@
+Index: src/main/resources/lib/Real.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>class Real is\r\nend
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/lib/Real.txt b/src/main/resources/lib/Real.txt
+--- a/src/main/resources/lib/Real.txt	(revision 03bffe85f4a8dce7a5bd1b7d047bcba66dcc0755)
++++ b/src/main/resources/lib/Real.txt	(date 1650997733892)
+@@ -1,2 +1,35 @@
+ class Real is
++// Constructors
++ this(p: Real)
++ this(p: Integer)
++
++ // Features
++ var Min : Real
++ var Max : Real
++
++ // Conversions
++ method toInteger : Integer
++
++ // Real binary arithmetics
++ method Plus(p:Real) : Real
++ method Plus(p:Integer) : Real
++ method Minus(p: Real) : Real
++ method Minus(p: Integer) : Real
++ method Mult(p: Real) : Real
++ method Mult(p: Integer) : Real
++ method Div(p: Integer) : Real
++ method Div(p: Real) : Real
++ method Rem(p: Integer) : Real
++ // Relations
++ method Less(p: Real) : Boolean
++ method Less(p: Integer) : Boolean
++
++ method LessEqual(p: Real) : Boolean
++ method LessEqual(p: Integer) : Boolean
++ method Greater(p: Real) : Boolean
++ method Greater(p: Integer) : Boolean
++ method GreaterEqual(p: Real) : Boolean
++ method GreaterEqual(p: Integer) : Boolean
++ method Equal(p: Real) : Boolean
++ method Equal(p: Integer) : Boolean
+ end
+\ No newline at end of file
+Index: src/main/resources/lib/Math.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>class MathUtils is\r\n  var Min : Integer\r\n  var Max : Integer\r\n  var z : Integer.d(s)\r\n\r\n  this(bt : Integer, ar : Integer) is\r\n      Max := bt\r\n      Min := ar\r\n  end\r\n\r\n  method empty() : Integer is\r\n  end\r\n\r\n  method MaxInt(a: Array[Integer]) : Integer is\r\n   var max : Integer.Min\r\n   var i : Integer.get(1)\r\n   while i.Less(a.Length) loop\r\n   if a.get(i).Greater(max) then max := a.get(i) end\r\n   i := i.Plus(1)\r\n   end\r\n   return max\r\n  end\r\nend
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/lib/Math.txt b/src/main/resources/lib/Math.txt
+--- a/src/main/resources/lib/Math.txt	(revision 03bffe85f4a8dce7a5bd1b7d047bcba66dcc0755)
++++ b/src/main/resources/lib/Math.txt	(date 1650999889923)
+@@ -3,6 +3,7 @@
+   var Max : Integer
+   var z : Integer.d(s)
+ 
++
+   this(bt : Integer, ar : Integer) is
+       Max := bt
+       Min := ar
+@@ -11,6 +12,24 @@
+   method empty() : Integer is
+   end
+ 
++
++  method isPrime(num: Integer): Boolean is
++    var i : Integer
++    i := 2
++    while i.LessEqual(i) loop
++        if n.Div(i).Equal(0) return false
++        i.Plus(1)
++    return true
++    end
++
++   method sqr(num: Integer, exp: Integer): Integer is
++    var res : Integer
++    while exp.LessEqual(1) loop
++        res := res*num
++    return res
++    end
++
++
+   method MaxInt(a: Array[Integer]) : Integer is
+    var max : Integer.Min
+    var i : Integer.get(1)
+Index: src/main/resources/lib/Integer.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>class Integer is\r\nend
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/lib/Integer.txt b/src/main/resources/lib/Integer.txt
+--- a/src/main/resources/lib/Integer.txt	(revision 03bffe85f4a8dce7a5bd1b7d047bcba66dcc0755)
++++ b/src/main/resources/lib/Integer.txt	(date 1650997687783)
+@@ -1,2 +1,31 @@
+ class Integer is
+-end
+\ No newline at end of file
++  this(p: Integer)
++
++ // Features
++ var Min : Integer
++ var Max : Integer
++
++ // Integer binary arithmetics
++
++ method Plus(p:Integer) : Integer
++ method Plus(p:Real) : Real
++ method Minus(p: Integer) : Integer
++ method Minus(p: Real) : Real
++ method Mult(p: Integer) : Integer
++ method Mult(p: Real) : Real
++ method Div(p: Real) : Real
++ method Div(p: Integer) : Real
++ method Rem(p: Integer) : Integer
++
++ // Relations
++ method Less(p: Integer) : Boolean
++ method Less(p: Real) : Boolean
++ method LessEqual(p: Integer) : Boolean
++ method LessEqual(p: Real) : Boolean
++ method Greater(p: Integer) : Boolean
++ method Greater(p: Real) : Boolean
++ method GreaterEqual(p: Integer) : Boolean
++ method GreaterEqual(p: Real) : Boolean
++ method Equal(p: Integer) : Boolean
++ method Equal(p: Real) : Boolean
++end
+Index: src/main/resources/lib/String.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/lib/String.txt b/src/main/resources/lib/String.txt
+new file mode 100644
+--- /dev/null	(date 1650998606562)
++++ b/src/main/resources/lib/String.txt	(date 1650998606562)
+@@ -0,0 +1,3 @@
++class String is
++
++end
+\ No newline at end of file
+Index: src/main/resources/lib/Boolean.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/lib/Boolean.txt b/src/main/resources/lib/Boolean.txt
+new file mode 100644
+--- /dev/null	(date 1650997780063)
++++ b/src/main/resources/lib/Boolean.txt	(date 1650997780063)
+@@ -0,0 +1,11 @@
++class Boolean is
++ // Constructor
++ this(Boolean)
++ // Conversion
++ method toInteger() : Integer
++ // Boolean operators
++ method Or(p: Boolean) : Boolean
++ method And(p: Boolean) : Boolean
++ method Xor(p: Boolean) : Boolean
++ method Not : Boolean
++end
+\ No newline at end of file
+Index: src/main/resources/lib/Char.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/lib/Char.txt b/src/main/resources/lib/Char.txt
+new file mode 100644
+--- /dev/null	(date 1650998606534)
++++ b/src/main/resources/lib/Char.txt	(date 1650998606534)
+@@ -0,0 +1,3 @@
++class Char is
++this(Char)
++end
+\ No newline at end of file
+Index: src/main/java/com/example/transpiler/codeGenerator/JavaCodeGenerator.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.transpiler.codeGenerator;\r\n\r\nimport com.example.transpiler.lexer.Lexer;\r\nimport com.example.transpiler.lexer.Token;\r\nimport com.example.transpiler.lexer.TokenType;\r\nimport com.example.transpiler.syntaxer.*;\r\nimport com.example.transpiler.typeChecker.TypeChecker;\r\nimport com.fasterxml.jackson.databind.ObjectMapper;\r\nimport java.io.File;\r\nimport java.io.IOException;\r\nimport java.nio.file.Files;\r\nimport java.nio.file.Path;\r\nimport java.nio.file.Paths;\r\nimport java.util.List;\r\nimport lombok.experimental.UtilityClass;\r\nimport lombok.extern.slf4j.Slf4j;\r\n\r\n@Slf4j\r\n@UtilityClass\r\npublic class JavaCodeGenerator {\r\n\r\n    // public contract\r\n\r\n    public void generateJavaSourceFile(File file) {\r\n//        generateJavaCodeForClass(file, ClassType.SOURCE);\r\n    }\r\n\r\n    public void generateJavaLibFile(File file) {\r\n        generateJavaCodeForClass(file, ClassType.LIBRARY);\r\n    }\r\n\r\n    // inner logic\r\n\r\n    private void generateJavaCodeForClass(File file, ClassType type) {\r\n\r\n        try {\r\n            String stringWithSourceCode = getStringForFile(file);\r\n            List<Token> tokens = Lexer.getTokensFromCode(stringWithSourceCode);\r\n            String className = tokens.stream()\r\n                .filter(token -> token.getType().equals(TokenType.IDENTIFIER))\r\n                .map(Token::getLexeme)\r\n                .findFirst().orElseThrow(() -> new CompilationException(\"No name for class\"));\r\n            Tree tree = GrammarChecker.checkGrammar(tokens);\r\n            ObjectMapper mapper = new ObjectMapper();\r\n            File treeFile = new File(className +  \"Tree.json\");\r\n            mapper.writeValue(treeFile, tree);\r\n            TypeChecker.check(tree);\r\n            ClassGenerator.generateClass(tree, type);\r\n        }\r\n        catch (IOException e) {\r\n            log.error(\"No such file with name {}\", file.getPath(), e);\r\n        }\r\n\r\n    }\r\n\r\n    private String getStringForFile(File file) throws IOException {\r\n        Path path = Paths.get(file.getPath());\r\n        return Files.readString(path);\r\n    }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/example/transpiler/codeGenerator/JavaCodeGenerator.java b/src/main/java/com/example/transpiler/codeGenerator/JavaCodeGenerator.java
+--- a/src/main/java/com/example/transpiler/codeGenerator/JavaCodeGenerator.java	(revision 03bffe85f4a8dce7a5bd1b7d047bcba66dcc0755)
++++ b/src/main/java/com/example/transpiler/codeGenerator/JavaCodeGenerator.java	(date 1650995387731)
+@@ -44,7 +44,7 @@
+             ObjectMapper mapper = new ObjectMapper();
+             File treeFile = new File(className +  "Tree.json");
+             mapper.writeValue(treeFile, tree);
+-            TypeChecker.check(tree);
++            //TypeChecker.check(tree);
+             ClassGenerator.generateClass(tree, type);
+         }
+         catch (IOException e) {
