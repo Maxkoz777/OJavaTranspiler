@@ -22,7 +22,7 @@ public class JavaCodeGenerator {
     // public contract
 
     public void generateJavaSourceFile(File file) {
-        generateJavaCodeForClass(file, ClassType.SOURCE);
+//        generateJavaCodeForClass(file, ClassType.SOURCE);
     }
 
     public void generateJavaLibFile(File file) {

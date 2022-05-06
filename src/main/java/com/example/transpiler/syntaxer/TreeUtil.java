@@ -149,7 +149,7 @@ public class TreeUtil {
         return declaredAssignments;
     }
 
-    private String expressionTypeToString(Node node) {
+    public String expressionTypeToString(Node node) {
         if (node.getType() != FormalGrammar.EXPRESSION) {
             throw new CompilationException("Analysed node is not a statement node");
         }
@@ -166,7 +166,14 @@ public class TreeUtil {
                 }
                 case IDENTIFIER -> {
                     builder.append(child.getValue());
-                    builder.append("(");
+                    if (i != childNodes.size() - 1) {
+                        if (childNodes.get(i + 1).getType().equals(FormalGrammar.IDENTIFIER)) {
+                            builder.append(".");
+                        } else {
+                            builder.append("(");
+                        }
+                    }
+
                 }
                 case ARGUMENTS -> {
                     List<String> args = child.getChildNodes().stream()
@@ -295,7 +302,7 @@ public class TreeUtil {
     public static ArrayList<Method> classMethods;
 
     public ArrayList<Method> getClassMethods(Node classNode){
-        classMethods = new  ArrayList<Method>();
+        classMethods = new  ArrayList<>();
         for (Node node: classNode.getChildNodes()){
             if (node.getType()==FormalGrammar.MEMBER_DECLARATION){
                if (node.getChildNodes().get(0).getType() == FormalGrammar.METHOD_DECLARATION){
@@ -304,26 +311,37 @@ public class TreeUtil {
                    List<Node> methodParamsNodeList = methodNode.getChildNodes()
                            .stream()
                            .filter(isParameters).toList();
-                   Node paramNode = methodParamsNodeList.isEmpty()? null: methodParamsNodeList.get(0);
+                   Node paramNode = methodParamsNodeList.isEmpty() ? null: methodParamsNodeList.get(0);
 
                    List<Node> methodBodyNodeList = methodNode.getChildNodes()
                            .stream()
                            .filter(isBody).toList();
-                   Node bodyNode = methodBodyNodeList.isEmpty()? null: methodBodyNodeList.get(0);
+                   Node bodyNode = methodBodyNodeList.isEmpty() ? null: methodBodyNodeList.get(0);
 
                    List<Node> methodIdentifierList = methodNode.getChildNodes()
                            .stream()
-                           .filter(isIdentifier).toList();
-                   String identifier = methodIdentifierList.isEmpty()? null: methodIdentifierList.get(0).getValue();
+                           .filter(isIdentifier).skip(1).toList();
+                   String identifier = methodIdentifierList.isEmpty() ? null: methodIdentifierList.get(0).getValue();
 
+                   List<Parameter> parameters = parameterNodeToParameters(paramNode);
 
-
-                   Method method = new Method(methodName, paramNode,identifier, bodyNode );
+                   Method method = new Method(methodName, parameters, identifier, bodyNode);
                    classMethods.add(method);
                }
             }
         }
         return classMethods;
+    }
+
+    public List<Parameter> parameterNodeToParameters(Node node) {
+        return node.getChildNodes().stream()
+            .map(param -> {
+                    List<Node> children = param.getChildNodes();
+                    String name = children.get(0).getValue();
+                    String type = children.get(1).getChildNodes().get(0).getValue();
+                    return new Parameter(name, type);
+            })
+            .toList();
     }
 
 
@@ -354,6 +372,21 @@ public class TreeUtil {
             }
         }
         return null;
+    }
+
+
+    public boolean isElseCondition(Node node) {
+        // todo return true if this IF_STATEMENT has else branch
+        // todo or return false
+        // todo before all check whether node is a IF_STATEMENT type and throw compilation exception with message if not
+        return false;
+    }
+
+    public static VariableDeclaration variableDeclarationFromNode(Node node) {
+        // todo return variable declaration with all fields filled from its node
+        // todo before all check whether node is a VARIABLE_DECLARATION type and throw compilation exception with message if not
+        List<VariableDeclaration> variableDeclarations = getVariableDeclarationsFromNodes(List.of(node));
+        return variableDeclarations.get(0);
     }
 
 //    public String getMethodReturnType(Node methodNode){

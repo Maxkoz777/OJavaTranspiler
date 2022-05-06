@@ -9,7 +9,16 @@ import lombok.Data;
 public class VariableDeclaration {
 
     private String name;
+    private String typeName;
     private JavaType type;
     private String expression;
     private Node node;
+
+    public VariableDeclaration(String name, JavaType type, String expression, Node node) {
+        this.name = name;
+        this.type = type;
+        this.expression = expression;
+        this.node = node;
+    }
+
 }
