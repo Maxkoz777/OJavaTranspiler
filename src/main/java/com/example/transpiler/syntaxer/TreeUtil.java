@@ -386,15 +386,8 @@ public class TreeUtil {
     }
 
     public static VariableDeclaration variableDeclarationFromNode(Node node) {
-        // todo return variable declaration with all fields filled from its node
-        // todo before all check whether node is a VARIABLE_DECLARATION type and throw compilation exception with message if not
         List<VariableDeclaration> variableDeclarations = getVariableDeclarationsFromNodes(List.of(node));
         return variableDeclarations.get(0);
     }
-
-//    public String getMethodReturnType(Node methodNode){
-//        System.out.println(methodNode.getChildNodes());
-//        return "val";
-//    }
 
 }
