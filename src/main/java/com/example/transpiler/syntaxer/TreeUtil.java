@@ -323,7 +323,10 @@ public class TreeUtil {
                            .filter(isIdentifier).skip(1).toList();
                    String identifier = methodIdentifierList.isEmpty() ? null: methodIdentifierList.get(0).getValue();
 
-                   List<Parameter> parameters = parameterNodeToParameters(paramNode);
+                   List<Parameter> parameters = new ArrayList<>();
+                   if (paramNode != null) {
+                       parameters = parameterNodeToParameters(paramNode);
+                   }
 
                    Method method = new Method(methodName, parameters, identifier, bodyNode);
                    classMethods.add(method);
