@@ -215,6 +215,7 @@ public class GrammarChecker {
         verifyToken("then");
         specifyBody(node);
         if ("else".equals(lexeme())) {
+            verifyToken("else");
             specifyBody(node);
         }
         verifyToken("end");
@@ -230,6 +231,10 @@ public class GrammarChecker {
             currentIndex = validIndex;
             node.deleteLastChild();
         }
+    }
+
+    private void specifyNestedClass(Node parentNode){
+
     }
 
     private void specifyExpression(Node parentNode) {

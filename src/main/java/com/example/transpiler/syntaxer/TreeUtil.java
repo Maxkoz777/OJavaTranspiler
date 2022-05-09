@@ -377,12 +377,15 @@ public class TreeUtil {
         return null;
     }
 
-
+    /** returns true if this IF_STATEMENT has else branch */
     public boolean isElseCondition(Node node) {
-        // todo return true if this IF_STATEMENT has else branch
-        // todo or return false
-        // todo before all check whether node is a IF_STATEMENT type and throw compilation exception with message if not
-        return false;
+        Integer bodyCount = 0;
+        for (Node childNode: node.getChildNodes()){
+            if (childNode.getType()==FormalGrammar.BODY){
+                bodyCount= bodyCount+1;
+            }
+        }
+        return bodyCount == 2;
     }
 
     public static VariableDeclaration variableDeclarationFromNode(Node node) {
