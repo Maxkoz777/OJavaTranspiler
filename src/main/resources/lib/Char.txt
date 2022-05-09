@@ -1,2 +1,10 @@
 class Char is
+      this(p: Char) is
+      end
+
+      var variable : Integer
+      var variable2 : Integer
+
+      class NestedChar is
+      end
 end

@@ -86,9 +86,19 @@ public class GrammarChecker {
             } catch (CompilationException exception) {
                 currentIndex = validIndex;
                 node.deleteLastChild();
-                specifyConstructorDeclaration(node);
+                try {
+                    specifyConstructorDeclaration(node);
+                } catch (CompilationException exception1) {
+                    currentIndex = validIndex;
+                    node.deleteLastChild();
+                    specifyNestedClassDeclaration(node);
+                }
             }
         }
+    }
+
+    public void specifyNestedClassDeclaration(Node parentNode){
+        specifyClassDeclaration(parentNode);
     }
 
     public void specifyVariableDeclaration(Node parentNode) {
@@ -231,10 +241,6 @@ public class GrammarChecker {
             currentIndex = validIndex;
             node.deleteLastChild();
         }
-    }
-
-    private void specifyNestedClass(Node parentNode){
-
     }
 
     private void specifyExpression(Node parentNode) {
