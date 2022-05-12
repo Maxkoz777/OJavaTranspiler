@@ -20,4 +20,9 @@ class MathUtils is
    end
    return max
   end
+
+  method isPrime(k: Integer) : Boolean is
+    var i : Integer
+    i := 2
+  end
 end

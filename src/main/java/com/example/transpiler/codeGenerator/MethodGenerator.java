@@ -27,6 +27,7 @@ import com.github.javaparser.ast.stmt.WhileStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import java.util.List;
+import java.util.Objects;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -72,12 +73,22 @@ public class MethodGenerator {
     private Statement variableDeclarationStatement(Node node) {
         VariableDeclaration variableDeclaration = TreeUtil.variableDeclarationFromNode(node);
         Type type = new ClassOrInterfaceType("var");
-        Expression expression = expressionFromString(variableDeclaration.getExpression());
-        VariableDeclarator declarator = new VariableDeclarator(
-            type,
-            variableDeclaration.getName(),
-            expression
-        );
+        boolean hasExpression = !variableDeclaration.getExpression().isEmpty();
+        Expression expression = hasExpression ? expressionFromString(variableDeclaration.getExpression()) : null;
+        VariableDeclarator declarator;
+        if (Objects.isNull(expression)) {
+            declarator = new VariableDeclarator(
+                type,
+                variableDeclaration.getName()
+            );
+        }
+        else {
+            declarator = new VariableDeclarator(
+                type,
+                variableDeclaration.getName(),
+                expression
+            );
+        }
         VariableDeclarationExpr expr = new VariableDeclarationExpr(declarator);
         return new ExpressionStmt(expr);
     }
