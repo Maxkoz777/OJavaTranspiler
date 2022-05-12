@@ -43,6 +43,8 @@ public class ClassGenerator {
         TreeUtil.getClassMethods(classNode)
                 .forEach(method -> MethodGenerator.generateMethod(cu, method, signature.getFirst()));
 
+//        TreeUtil.getNestedClasses(classNode);
+
         generateCode(cu, classType, signature.getFirst());
 
     }

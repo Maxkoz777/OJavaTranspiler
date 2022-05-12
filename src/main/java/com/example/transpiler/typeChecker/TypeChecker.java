@@ -29,6 +29,7 @@ public class TypeChecker {
     private List<ClassDeclaration> classDeclarations = new ArrayList<>();
     private boolean isTreeArrayReady = false;
     private List<DebtVariable> variablesToCheck = new ArrayList<>();
+    private List<String> knownTypes = new ArrayList<>();
     private Tree currentTree;
 
     // Maps will consume memory, but we will have linear search for types among classes
@@ -47,6 +48,7 @@ public class TypeChecker {
 
     private void analyseTree(Tree tree) {
         trees.add(tree);
+        knownTypes.addAll(TreeUtil.getAllTypesForTree(tree));
         List<Node> classNodes = TreeUtil.inOrderSearch(tree, List.of(FormalGrammar.CLASS_DECLARATION));
         classNodes.forEach(node -> {
             ClassDeclaration classDeclaration = new ClassDeclaration(node);
@@ -194,7 +196,7 @@ public class TypeChecker {
     private void checkVariableAgainstAssignments(Variable variable, List<Assignment> assignments) {
         List<String> expressions = new ArrayList<>();
 
-        expressions.addAll(assignments.stream().map(Assignment::getExpression).toList());
+//        expressions.addAll(assignments.stream().map(Assignment::getExpression).toList());
         if (variable.getType().equals(JavaType.UNDEFINED)) {
             expressions.add(variable.getExpression());
         }

@@ -347,6 +347,16 @@ public class TreeUtil {
             .toList();
     }
 
+    /**
+     *
+     * @param tree is a tree containing possible types
+     * @return list of all types met in our tree (e.g. main class name + class name fro )
+     */
+    public List<String> getAllTypesForTree(Tree tree) {
+        List<Node> classNodes = inOrderSearch(tree, List.of(FormalGrammar.CLASS_DECLARATION));
+        return classNodes.stream().map(TreeUtil::getClassNameForClassDeclarationNode).toList();
+    }
+
 
     public Node getNodeScope(Tree tree, Node node) {
         Node res = findNodeScope(tree.getRoot (), node, null);
@@ -393,4 +403,8 @@ public class TreeUtil {
         return variableDeclarations.get(0);
     }
 
+    public static List<Node> getNestedClasses(Node classNode) {
+        // todo get all class declarations for given class
+        return null;
+    }
 }
