@@ -451,4 +451,10 @@ public class TreeUtil {
         // if scope is a method - check parameters first
         return null;
     }
+
+    public Node getDeclarationNodeForLocalName(String term, Node expressionDeclaration, Tree tree) {
+        // todo term - variable name inside some expression from "expression declaration"
+        // todo find a declaration(VARIABLE_DECLARATION or PARAMETER_DECLARATION) for term
+        return null;
+    }
 }

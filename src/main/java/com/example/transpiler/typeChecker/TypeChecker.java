@@ -156,6 +156,22 @@ public class TypeChecker {
             case METHOD_DECLARATION -> type = getMethodReturnTypeByDeclaration(termDeclaration);
             case PARAMETER_DECLARATION -> type = getParameterTypeByDeclaration(termDeclaration);
             case VARIABLE_DECLARATION -> {
+                TypeRecursiveDefinitionDto recursiveTypeDto = getTypeRecursiveDefinitionDto(wholeExpression);
+
+                if (recursiveTypeDto.getType().equals(ExpressionResult.METHOD)) {
+                    return getTypeRecursively(
+                        recursiveTypeDto.getTerm(),
+                        TreeUtil.getMethodDeclarationNodeByMethodName(recursiveTypeDto.getTerm(), tree),
+                        recursiveTypeDto.getExpression(),
+                        tree
+                    );
+                } else {
+                    Node declaration = TreeUtil.getDeclarationNodeForLocalName(
+                        recursiveTypeDto.getTerm(),
+                        termDeclaration,
+                        recursiveTypeDto.getTree()
+                    );
+                }
                 // todo implement recursive logic
                 type = null;
             }
@@ -164,12 +180,48 @@ public class TypeChecker {
         return type;
     }
 
-    private static String getParameterTypeByDeclaration(Node parameterDeclaration) {
+    private static TypeRecursiveDefinitionDto getTypeRecursiveDefinitionDto(String wholeExpression) {
+        int dotPosition = wholeExpression.indexOf('.');
+        int bracketPosition = wholeExpression.indexOf('(');
+        // if no "." and "(" inside expression => the last iteration
+        if (dotPosition * bracketPosition == 1) {
+            return new TypeRecursiveDefinitionDto(
+                wholeExpression,
+                "",
+                ExpressionResult.VARIABLE,
+                null
+            );
+        }
+        else if (bracketPosition == -1 || dotPosition > -1 && dotPosition < bracketPosition) {
+            // todo check for classes
+            String newTerm = wholeExpression.substring(0, dotPosition);
+            String expression = wholeExpression.substring(dotPosition + 1);
+            return new TypeRecursiveDefinitionDto(
+                newTerm,
+                expression,
+                ExpressionResult.VARIABLE,
+                null
+            );
+        }
+        else {
+            String newTerm = wholeExpression.substring(0, bracketPosition);
+            int closingBracketPosition = wholeExpression.indexOf(')');
+            String expression = wholeExpression.substring(closingBracketPosition + 1);
+            return new TypeRecursiveDefinitionDto(
+                newTerm,
+                expression,
+                ExpressionResult.METHOD,
+                null
+            );
+        }
+    }
+
+    private String getParameterTypeByDeclaration(Node parameterDeclaration) {
         return parameterDeclaration.getChildNodes().get(1)
             .getChildNodes().get(0).getValue();
     }
 
-    private static String getMethodReturnTypeByDeclaration(Node methodDeclaration) {
+    private String getMethodReturnTypeByDeclaration(Node methodDeclaration) {
         return methodDeclaration.getChildNodes().get(2).getValue();
     }
 
