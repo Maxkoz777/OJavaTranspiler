@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ import lombok.experimental.UtilityClass;
 public class TypeChecker {
 
     public int treesCount = 0;
-    private List<Tree> trees = new ArrayList<>();
+    public List<Tree> trees = new ArrayList<>();
     private List<ClassDeclaration> classDeclarations = new ArrayList<>();
     private boolean isTreeArrayReady = false;
     private List<DebtVariable> variablesToCheck = new ArrayList<>();
@@ -39,7 +40,7 @@ public class TypeChecker {
     private Map<ClassDeclaration, List<Method>> classMethodsMap = new HashMap<>();
 
     public void check(Tree tree) {
-
+        currentTree = tree;
         analyseTree(tree);
         checkIfReadyToParseAllVariables();
         processCheckUnitForClass(TreeUtil.getAllVariablesForProgram(tree));
@@ -47,6 +48,7 @@ public class TypeChecker {
     }
 
     private void analyseTree(Tree tree) {
+        tree.setClassName(TreeUtil.getNameForTree(tree));
         trees.add(tree);
         knownTypes.addAll(TreeUtil.getAllTypesForTree(tree));
         List<Node> classNodes = TreeUtil.inOrderSearch(tree, List.of(FormalGrammar.CLASS_DECLARATION));
@@ -71,6 +73,9 @@ public class TypeChecker {
                 Variable variable = new Variable(
                     variableDeclaration.getName(),
                     variableDeclaration.getType()
+                );
+                variable.setScope(
+                    TreeUtil.getNodeScope(currentTree, variableDeclaration.getNode())
                 );
                 if (variableDeclaration.getType().equals(JavaType.UNDEFINED)) {
                     variable.setExpression(variableDeclaration.getExpression());
@@ -109,40 +114,65 @@ public class TypeChecker {
 
     }
 
-    private String recursiveTypeExtraction(VariableExpression variableExpression, ClassDeclaration classDeclaration, Node initDeclaration) {
-        ExpressionResult expressionResult = variableExpression.getType();
-        String shortExpression = variableExpression.getTerm();
-        String expression = variableExpression.getWholeExpression();
-        String type = "";
+    private String typeForExpressionWithTypes(VariableExpression variableExpression, DebtVariable debtVariable) {
+
+        Node termDeclaration = TreeUtil.findVariableDeclarationNodeInScopeByName(
+            variableExpression.getTerm(),
+            debtVariable.getScope()
+        );
+
+        if (Objects.isNull(termDeclaration)) {
+
+            switch (variableExpression.getType()) {
+                case VARIABLE -> termDeclaration = TreeUtil.getVariableDeclarationByVariableName(
+                    variableExpression.getTerm(),
+                    debtVariable.getTree()
+                );
+                case METHOD -> termDeclaration = TreeUtil.getMethodDeclarationNodeByMethodName(
+                    variableExpression.getTerm(),
+                    debtVariable.getTree()
+                );
+            }
+
+        }
+
+        return getTypeRecursively(
+            variableExpression.getTerm(),
+            termDeclaration,
+            variableExpression.getWholeExpression(),
+            debtVariable.getTree()
+        );
+    }
+
+    private String getTypeRecursively(String term, Node termDeclaration, String wholeExpression, Tree tree) {
+
+        String type = null;
+
+        if (wholeExpression.isEmpty()) {
+            return tree.getClassName();
+        }
+
+        switch (termDeclaration.getType()) {
+            case METHOD_DECLARATION -> type = getMethodReturnTypeByDeclaration(termDeclaration);
+            case PARAMETER_DECLARATION -> type = getParameterTypeByDeclaration(termDeclaration);
+            case VARIABLE_DECLARATION -> {
+                // todo implement recursive logic
+                type = null;
+            }
+        }
 
         return type;
     }
 
-    private String typeForExpressionWithTypes(VariableExpression variableExpression, DebtVariable debtVariable) {
-        ExpressionResult expressionResult = variableExpression.getType();
-        String shortExpression = variableExpression.getTerm();
-        String expression = variableExpression.getWholeExpression();
-        String type;
-        if (shortExpression.length() != expression.length()) {
-//            Node classNode = TreeUtil. - get class node for variable declaration and tree
-//            ClassDeclaration classDeclaration = new ClassDeclaration(classNode);
-//            type = recursiveTypeExtraction(variableExpression, classDeclaration, debtVariable.getDeclarationNode());
-        }
-        List<FormalGrammar> filter;
-        boolean isVariable = expressionResult.equals(ExpressionResult.VARIABLE);
-        if (isVariable) {
-            filter = List.of(FormalGrammar.ASSIGNMENT, FormalGrammar.VARIABLE_DECLARATION, FormalGrammar.MEMBER_DECLARATION);
-        } else {
-            filter = List.of(FormalGrammar.METHOD_DECLARATION);
-        }
-        List<Node> nodes = new ArrayList<>();
-        trees.forEach(tree -> nodes.addAll(TreeUtil.inOrderSearch(tree, filter)));
-        if (isVariable) {
-            return typeForVariableDeclaration(nodes, shortExpression, debtVariable.getName());
-        } else {
-            return typeForMethodDeclaration(nodes, shortExpression);
-        }
+    private static String getParameterTypeByDeclaration(Node parameterDeclaration) {
+        return parameterDeclaration.getChildNodes().get(1)
+            .getChildNodes().get(0).getValue();
     }
+
+    private static String getMethodReturnTypeByDeclaration(Node methodDeclaration) {
+        return methodDeclaration.getChildNodes().get(2).getValue();
+    }
+
 
     private String typeForMethodDeclaration(List<Node> nodes, String name) {
         List<Node> properNodes = nodes.stream()
@@ -194,31 +224,37 @@ public class TypeChecker {
     }
 
     private void checkVariableAgainstAssignments(Variable variable, List<Assignment> assignments) {
-        List<String> expressions = new ArrayList<>();
-
-//        expressions.addAll(assignments.stream().map(Assignment::getExpression).toList());
+        Map<Node, String> expressionWithNodeMap = new HashMap<>();
+        assignments.forEach(assignment -> expressionWithNodeMap.put(
+            assignment.getNode(),
+            assignment.getExpression()
+        ));
         if (variable.getType().equals(JavaType.UNDEFINED)) {
-            expressions.add(variable.getExpression());
+            expressionWithNodeMap.put(null, variable.getExpression());
         }
-        populateDebtVariables(variable, expressions);
+        populateDebtVariables(variable, expressionWithNodeMap);
     }
 
-    private void populateDebtVariables(Variable variable, List<String> expressions) {
+    private void populateDebtVariables(Variable variable, Map<Node, String> expressionsWithNodes) {
         DebtVariable debtVariable = new DebtVariable(
             variable.getName(),
             currentTree,
-            expressions.stream().map(TypeChecker::getNameWithTypeOfExpression).toList(),
-            variable.getDeclarationNode()
+            expressionsWithNodes.entrySet().stream().map(TypeChecker::getNameWithTypeOfExpression).toList(),
+            variable.getDeclarationNode(),
+            variable.getScope()
         );
         variablesToCheck.add(debtVariable);
     }
 
-    private VariableExpression getNameWithTypeOfExpression(String expression) {
+    private VariableExpression getNameWithTypeOfExpression(Map.Entry<Node, String> expressionWithNode) {
+        String expression = expressionWithNode.getValue();
+        Node node = expressionWithNode.getKey();
         String[] elements = expression.split("\\.");
         String lastTerm = elements[elements.length - 1];
         ExpressionResult result = !lastTerm.contains("(") ? ExpressionResult.VARIABLE : ExpressionResult.METHOD;
         String name = result.equals(ExpressionResult.METHOD) ? lastTerm.substring(0, lastTerm.indexOf("(")) : lastTerm;
-        return new VariableExpression(name, result, expression);
+        boolean isAssignment = !Objects.isNull(node);
+        return new VariableExpression(name, result, expression, node, isAssignment);
     }
 
     private final Predicate<Pair<Variable, Long>> isNotStrictlyDefined = pair -> pair.getSecond() > 0;
@@ -232,6 +268,7 @@ public class TypeChecker {
     private Long numberOfAssignmentsForVariable(Variable variable, List<Assignment> assignments) {
         return assignments.stream()
             .filter(assignment -> assignment.getVarName().equals(variable.getName()))
+            .filter(assignment -> TreeUtil.inScope(assignment.getNode(), variable.getScope()))
             .count();
     }
 

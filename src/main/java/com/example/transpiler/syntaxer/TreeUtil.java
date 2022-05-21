@@ -2,6 +2,8 @@ package com.example.transpiler.syntaxer;
 
 import com.example.transpiler.codeGenerator.model.*;
 import com.example.transpiler.typeChecker.CheckUnit;
+import com.example.transpiler.typeChecker.TypeChecker;
+import com.example.transpiler.typeChecker.TypeCheckerException;
 import com.example.transpiler.util.Pair;
 
 import java.util.ArrayList;
@@ -370,8 +372,7 @@ public class TreeUtil {
             List<FormalGrammar> declarations = List.of(
                     FormalGrammar.METHOD_DECLARATION,
                     FormalGrammar.CLASS_DECLARATION,
-                    FormalGrammar.CONSTRUCTOR_DECLARATION,
-                    FormalGrammar.MEMBER_DECLARATION
+                    FormalGrammar.CONSTRUCTOR_DECLARATION
             );
             if (declarations.contains(n.getType())) {
                 currentScope = n;
@@ -405,6 +406,49 @@ public class TreeUtil {
 
     public static List<Node> getNestedClasses(Node classNode) {
         // todo get all class declarations for given class
+        return null;
+    }
+
+    public boolean inScope(Node target, Node scope) {
+        // todo return true if target is inside scope
+        // todo it can be a child of a child of provided scope with any depth of such including
+        return true;
+    }
+
+    public String getNameForTree(Tree tree) {
+        Node classNode = TreeUtil.getMainClassNode(tree);
+        return TreeUtil.getClassSignature(classNode).getFirst();
+    }
+
+    public Tree getTreeForClassName(String className) {
+        return TypeChecker.trees.stream()
+            .filter(tree -> tree.getClassName().equals(className))
+            .findFirst()
+            .orElseThrow(
+                () -> new TypeCheckerException("No tree with class named: " + className)
+            );
+    }
+
+    public String getInferredTypeForNodeInClass(Node node, String className) {
+        Tree tree = TreeUtil.getTreeForClassName(className);
+        // todo implement type inference (I'll do it myself later)
+        return "var";
+    }
+
+    public Node getMethodDeclarationNodeByMethodName(String name, Tree tree) {
+        // todo find decl node for method name if such method exist
+        // todo there are no overloading in our language => no duplicate method names
+        return null;
+    }
+
+    public Node getVariableDeclarationByVariableName(String name, Tree tree) {
+        // todo find decl node for method name if such method exist
+        return null;
+    }
+
+    public Node findVariableDeclarationNodeInScopeByName(String name, Node scope) {
+        // todo in scope-Node find variable declaration node with provided name
+        // if scope is a method - check parameters first
         return null;
     }
 }

@@ -14,5 +14,6 @@ public class DebtVariable {
     private Tree tree;
     private List<VariableExpression> expressionsWithTypes;
     private Node declarationNode;
+    private Node scope;
 
 }

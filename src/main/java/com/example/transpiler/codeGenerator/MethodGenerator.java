@@ -33,9 +33,11 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class MethodGenerator {
 
+    private String className;
+
 
     public void generateMethod(CompilationUnit cu, Method method, String className) {
-
+        MethodGenerator.className = className;
         List<Node> bodyNodes = method.getBody().getChildNodes();
 
         ClassOrInterfaceDeclaration clazz = cu.getClassByName(className)
@@ -72,7 +74,7 @@ public class MethodGenerator {
 
     private Statement variableDeclarationStatement(Node node) {
         VariableDeclaration variableDeclaration = TreeUtil.variableDeclarationFromNode(node);
-        Type type = new ClassOrInterfaceType("var");
+        Type type = new ClassOrInterfaceType(TreeUtil.getInferredTypeForNodeInClass(node, className));
         boolean hasExpression = !variableDeclaration.getExpression().isEmpty();
         Expression expression = hasExpression ? expressionFromString(variableDeclaration.getExpression()) : null;
         VariableDeclarator declarator;

@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class Tree {
     private final Node root;
+    private String className;
 
     public Tree() {
         root = new Node(FormalGrammar.PROGRAM);

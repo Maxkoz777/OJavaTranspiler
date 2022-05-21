@@ -11,6 +11,7 @@ public class Variable {
     private String expression;
     private JavaType type;
     private Node declarationNode;
+    private Node scope;
 
     private void defineType() {
         switch (typeName) {

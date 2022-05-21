@@ -10,5 +10,6 @@ public class VariableExpression {
     private String term;
     private ExpressionResult type;
     private String wholeExpression;
-//    private Node assignmentNode;
+    private Node assignmentNode;
+    private boolean isAssignment;
 }
