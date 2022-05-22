@@ -171,9 +171,18 @@ public class TypeChecker {
                         termDeclaration,
                         recursiveTypeDto.getTree()
                     );
+                    if (declaration.getType().equals(FormalGrammar.PARAMETER_DECLARATION)) {
+                        return getParameterTypeByDeclaration(declaration);
+                    } else {
+                        return getTypeRecursively(
+                            recursiveTypeDto.getTerm(),
+                            declaration,
+                            recursiveTypeDto.getExpression(),
+                            recursiveTypeDto.getTree()
+                        );
+                    }
                 }
-                // todo implement recursive logic
-                type = null;
+
             }
         }
 
@@ -193,14 +202,26 @@ public class TypeChecker {
             );
         }
         else if (bracketPosition == -1 || dotPosition > -1 && dotPosition < bracketPosition) {
-            // todo check for classes
             String newTerm = wholeExpression.substring(0, dotPosition);
             String expression = wholeExpression.substring(dotPosition + 1);
+            Tree tree = null;
+            if (knownTypes.contains(newTerm)) {
+                String finalNewTerm = newTerm;
+                tree = trees.stream()
+                    .filter(t -> t.getClassName().equals(finalNewTerm))
+                    .findFirst()
+                    .orElseThrow(
+                        () -> new TypeCheckerException("No tree with name " + finalNewTerm + " exist in trees")
+                    );
+                int updatedDotPosition = expression.indexOf('.');
+                newTerm = expression.substring(0, updatedDotPosition);
+                expression = expression.substring(updatedDotPosition + 1);
+            }
             return new TypeRecursiveDefinitionDto(
                 newTerm,
                 expression,
                 ExpressionResult.VARIABLE,
-                null
+                tree
             );
         }
         else {
