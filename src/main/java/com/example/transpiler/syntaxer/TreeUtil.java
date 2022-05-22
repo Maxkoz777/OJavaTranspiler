@@ -27,7 +27,7 @@ public class TreeUtil {
     public final Predicate<Node> isBody = node -> node.getType().equals(FormalGrammar.BODY);
 
     public final Predicate<Node> isParameterDeclaration = node -> node.getType().equals(FormalGrammar.PARAMETER_DECLARATION);
-
+    public final Predicate<Node> isClassDeclaration = node -> node.getType().equals(FormalGrammar.CLASS_DECLARATION);
     public final Predicate<Node> isParameters = node -> node.getType().equals(FormalGrammar.PARAMETERS);
     public final Predicate<Node> isClassName = node -> node.getType().equals(FormalGrammar.CLASS_NAME);
     public final Predicate<Node> isStatement = node -> node.getType().equals(FormalGrammar.STATEMENT);
@@ -407,8 +407,11 @@ public class TreeUtil {
     }
 
     public static List<Node> getNestedClasses(Node classNode) {
-        // todo get all class declarations for given class
-        return null;
+        return classNode.getChildNodes().stream()
+            .filter(isMember)
+            .flatMap(convertToChildNodes)
+            .filter(isClassDeclaration)
+            .toList();
     }
 
 

@@ -6,6 +6,8 @@ import com.example.transpiler.syntaxer.Tree;
 import com.example.transpiler.syntaxer.TreeUtil;
 import com.example.transpiler.util.Pair;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -52,7 +54,11 @@ public class ClassGenerator {
 
     private void generateNestedClass(CompilationUnit cu, Node nestedClass, ClassOrInterfaceDeclaration mainClass) {
         String className = TreeUtil.getClassSignature(nestedClass).getFirst();
-        ClassOrInterfaceDeclaration clazz = cu.addClass(className);
+        ClassOrInterfaceDeclaration clazz = new ClassOrInterfaceDeclaration(
+            new NodeList<>(),
+            false,
+            className
+        );
 
         TreeUtil.getClassVariables(nestedClass)
             .forEach(variable -> clazz.addField(variable.getTypeName(), variable.getName()));
