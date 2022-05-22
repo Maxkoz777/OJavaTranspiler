@@ -464,17 +464,38 @@ public class TreeUtil {
         }
     }
 
-    public Node getVariableDeclarationByVariableName(String name, Tree tree) {
+    public Node getVariableDeclarationByVariableName(String name, Node scope, Tree tree) {
+        // итерация по скоупам
+        Node result;
+        Node currentScope = scope;
+        while (!currentScope.getType().equals(FormalGrammar.CLASS_DECLARATION)) {
+            result = findVariableDeclarationNodeInScopeByName(name, currentScope);
+            if (result == null) {
+                currentScope = getNodeScope(tree, currentScope);
+                break;
+            }
+        }
+
         variableDeclarations = new ArrayList<>();
-        searchVariables(tree.getRoot(), name);
-        if (variableDeclarations.size() > 1) {
-            throw new CompilationException("Duplicated variable declarations detected. Don't do this please..");
-        } else if (variableDeclarations.size() == 0) {
-            return null;
-        } else return variableDeclarations.get(0);
+        searchVariables(currentScope, name);
+        result = variableDeclarations.get(0);
+
+        return result;
     }
 
     public List<Node> variableDeclarations;
+
+
+    public Node findVariableDeclarationNodeInScopeByName(String name, Node scope) {
+        variableDeclarations = new ArrayList<>();
+        searchVariables(scope, name);
+
+        // if scope is a method - check parameters first todo
+
+        if (variableDeclarations.size() == 0) {
+            return null;
+        } else return variableDeclarations.get(0);
+    }
 
     public void searchVariables(Node node, String name) {
         if (node.getType().equals(FormalGrammar.VARIABLE_DECLARATION)) {
@@ -488,13 +509,6 @@ public class TreeUtil {
         for (Node childNode : childNodes) {
             searchVariables(childNode, name);
         }
-    }
-
-
-    public Node findVariableDeclarationNodeInScopeByName(String name, Node scope) {
-        // todo in scope-Node find variable declaration node with provided name
-        // if scope is a method - check parameters first
-        return null;
     }
 
     public Node getDeclarationNodeForLocalName(String term, Node expressionDeclaration, Tree tree) {
