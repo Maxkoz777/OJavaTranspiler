@@ -64,10 +64,10 @@ public class ClassGenerator {
             .forEach(variable -> clazz.addField(variable.getTypeName(), variable.getName()));
 
         TreeUtil.getConstructors(nestedClass)
-            .forEach(constructor -> ConstructorGenerator.generateConstructor(cu, constructor));
+            .forEach(constructor -> ConstructorGenerator.generateConstructor(clazz, constructor));
 
         TreeUtil.getClassMethods(nestedClass)
-            .forEach(method -> MethodGenerator.generateMethod(cu, method, className));
+            .forEach(method -> MethodGenerator.generateMethod(clazz, method, className));
 
         TreeUtil.getNestedClasses(nestedClass)
             .forEach(nested -> generateNestedClass(cu, nested, clazz));

@@ -436,7 +436,7 @@ public class TreeUtil {
     }
 
     public String getInferredTypeForNodeInClass(Node node, String className) {
-        Tree tree = TreeUtil.getTreeForClassName(className);
+        //Tree tree = TreeUtil.getTreeForClassName(className);
         // todo implement type inference (I'll do it myself later)
         return "var";
     }

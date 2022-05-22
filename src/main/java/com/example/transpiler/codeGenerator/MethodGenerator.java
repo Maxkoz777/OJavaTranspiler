@@ -52,6 +52,19 @@ public class MethodGenerator {
         methodDeclaration.setBody(blockStmt);
     }
 
+    public void generateMethod(ClassOrInterfaceDeclaration clazz, Method method, String className) {
+        MethodGenerator.className = className;
+        List<Node> bodyNodes = method.getBody().getChildNodes();
+        MethodDeclaration methodDeclaration = clazz.addMethod(method.getName(), Keyword.PUBLIC);
+        method.getParameters().forEach(parameter -> methodDeclaration.addAndGetParameter(
+            parameter.getType(),
+            parameter.getName()
+        ));
+        methodDeclaration.setType(method.getType());
+        BlockStmt blockStmt = generateBody(bodyNodes);
+        methodDeclaration.setBody(blockStmt);
+    }
+
     private BlockStmt generateBody(List<Node> nodes) {
         BlockStmt blockStmt = new BlockStmt();
         nodes.stream()
