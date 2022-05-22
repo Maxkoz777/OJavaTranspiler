@@ -6,6 +6,8 @@ import com.example.transpiler.syntaxer.Tree;
 import com.example.transpiler.syntaxer.TreeUtil;
 import com.example.transpiler.util.Pair;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -43,10 +45,35 @@ public class ClassGenerator {
         TreeUtil.getClassMethods(classNode)
                 .forEach(method -> MethodGenerator.generateMethod(cu, method, signature.getFirst()));
 
-//        TreeUtil.getNestedClasses(classNode);
+        TreeUtil.getNestedClasses(classNode)
+                .forEach(nestedClass -> generateNestedClass(cu, nestedClass, mainClass));
 
         generateCode(cu, classType, signature.getFirst());
 
+    }
+
+    private void generateNestedClass(CompilationUnit cu, Node nestedClass, ClassOrInterfaceDeclaration mainClass) {
+        String className = TreeUtil.getClassSignature(nestedClass).getFirst();
+        ClassOrInterfaceDeclaration clazz = new ClassOrInterfaceDeclaration(
+            new NodeList<>(),
+            false,
+            className
+        );
+
+        TreeUtil.getClassVariables(nestedClass)
+            .forEach(variable -> clazz.addField(variable.getTypeName(), variable.getName()));
+
+        TreeUtil.getConstructors(nestedClass)
+            .forEach(constructor -> ConstructorGenerator.generateConstructor(clazz, constructor));
+
+        TreeUtil.getClassMethods(nestedClass)
+            .forEach(method -> MethodGenerator.generateMethod(clazz, method, className));
+
+        TreeUtil.getNestedClasses(nestedClass)
+            .forEach(nested -> generateNestedClass(cu, nested, clazz));
+
+
+        mainClass.addMember(clazz);
     }
 
     private void generateCode(CompilationUnit cu, ClassType type, String name) {

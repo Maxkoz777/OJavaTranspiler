@@ -43,4 +43,27 @@ public class ConstructorGenerator {
 
     }
 
+    public void generateConstructor(ClassOrInterfaceDeclaration clazz, Constructor constructor) {
+
+        ConstructorDeclaration constructorDeclaration = clazz.addConstructor(Modifier.Keyword.PUBLIC);
+        constructor.getParameters()
+            .forEach(parameter -> constructorDeclaration.addAndGetParameter(
+                parameter.getTypeName(),
+                parameter.getName())
+            );
+        BlockStmt blockStmt = new BlockStmt();
+        constructor.getAssignments()
+            .forEach(assignment -> blockStmt.addStatement(
+                new ExpressionStmt(
+                    new AssignExpr(
+                        new FieldAccessExpr(new ThisExpr(), assignment.getVarName()),
+                        new NameExpr(assignment.getExpression()),
+                        AssignExpr.Operator.ASSIGN
+                    )
+                )
+            ));
+        constructorDeclaration.setBody(blockStmt);
+
+    }
+
 }

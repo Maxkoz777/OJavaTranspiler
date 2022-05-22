@@ -1,2 +1,4 @@
 class Ball is
+  class Child is
+  end
 end

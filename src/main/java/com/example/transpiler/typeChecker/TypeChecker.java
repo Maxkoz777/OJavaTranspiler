@@ -91,7 +91,7 @@ public class TypeChecker {
             .toList();
         checkProblemVariables(problemVariables, unit.getAssignments());
         if (isTreeArrayReady) {
-            majorCheck();
+            //majorCheck();
         }
     }
 
