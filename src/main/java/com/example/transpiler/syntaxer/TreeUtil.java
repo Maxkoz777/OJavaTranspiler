@@ -408,10 +408,10 @@ public class TreeUtil {
 
     public static List<Node> getNestedClasses(Node classNode) {
         return classNode.getChildNodes().stream()
-            .filter(isMember)
-            .flatMap(convertToChildNodes)
-            .filter(isClassDeclaration)
-            .toList();
+                .filter(isMember)
+                .flatMap(convertToChildNodes)
+                .filter(isClassDeclaration)
+                .toList();
     }
 
 
@@ -471,14 +471,13 @@ public class TreeUtil {
         // итерация по скоупам
         Node result;
         Node currentScope = scope;
-        do  {
+        while (!currentScope.getType().equals(FormalGrammar.CLASS_DECLARATION)) {
             result = findVariableDeclarationNodeInScopeByName(name, currentScope);
             if (result == null) {
                 currentScope = getNodeScope(tree, currentScope);
-            } else {
                 break;
             }
-        } while (currentScope.getType().equals(FormalGrammar.CLASS_DECLARATION));
+        }
 
         variableDeclarations = new ArrayList<>();
         searchVariables(currentScope, name);
