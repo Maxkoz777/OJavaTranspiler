@@ -91,10 +91,34 @@ public class GrammarChecker {
                 } catch (CompilationException exception1) {
                     currentIndex = validIndex;
                     node.deleteLastChild();
-                    specifyNestedClassDeclaration(node);
+                    try {
+                        specifyNestedClassDeclaration(node);
+                    } catch (CompilationException exception2) {
+                        currentIndex = validIndex;
+                        node.deleteLastChild();
+                        specifyFunctionDeclaration(node);
+                    }
+
                 }
             }
         }
+    }
+
+    public void specifyFunctionDeclaration(Node parentNode) {
+        Node node = tree.addNode(FormalGrammar.FUNCTION_DECLARATION, parentNode);
+        verifyToken("function");
+        verifyToken("<");
+        specifyIdentifier(node);
+        verifyToken(",");
+        specifyIdentifier(node);
+        verifyToken(">");
+        specifyIdentifier(node);
+        verifyToken(":");
+        verifyToken("=");
+        specifyIdentifier(node);
+        verifyToken("-");
+        verifyToken(">");
+        specifyExpression(node);
     }
 
     public void specifyNestedClassDeclaration(Node parentNode){

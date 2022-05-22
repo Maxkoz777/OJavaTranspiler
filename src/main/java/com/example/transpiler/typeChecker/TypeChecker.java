@@ -126,6 +126,7 @@ public class TypeChecker {
             switch (variableExpression.getType()) {
                 case VARIABLE -> termDeclaration = TreeUtil.getVariableDeclarationByVariableName(
                     variableExpression.getTerm(),
+                    debtVariable.getScope(),
                     debtVariable.getTree()
                 );
                 case METHOD -> termDeclaration = TreeUtil.getMethodDeclarationNodeByMethodName(

@@ -19,5 +19,6 @@ public enum FormalGrammar {
     EXPRESSION,
     ARGUMENTS,
     PRIMARY,
-    IDENTIFIER
+    IDENTIFIER,
+    FUNCTION_DECLARATION
 }
