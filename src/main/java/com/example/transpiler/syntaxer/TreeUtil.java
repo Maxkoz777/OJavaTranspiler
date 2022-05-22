@@ -441,13 +441,11 @@ public class TreeUtil {
     public Node getMethodDeclarationNodeByMethodName(String name, Tree tree) {
         methodDeclarations = new ArrayList<>();
         searchMethods(tree.getRoot(), name);
-        if (methodDeclarations.size()>1){
+        if (methodDeclarations.size() > 1) {
             throw new CompilationException("Duplicated method declarations detected. Overloading is not supported.");
-        }
-        else if (methodDeclarations.size()==0){
+        } else if (methodDeclarations.size() == 0) {
             return null;
-        }
-        else return methodDeclarations.get(0);
+        } else return methodDeclarations.get(0);
     }
 
     public List<Node> methodDeclarations;
@@ -467,10 +465,31 @@ public class TreeUtil {
     }
 
     public Node getVariableDeclarationByVariableName(String name, Tree tree) {
-        // todo find decl node for method name if such method exist
-
-        return null;
+        variableDeclarations = new ArrayList<>();
+        searchVariables(tree.getRoot(), name);
+        if (variableDeclarations.size() > 1) {
+            throw new CompilationException("Duplicated variable declarations detected. Don't do this please..");
+        } else if (variableDeclarations.size() == 0) {
+            return null;
+        } else return variableDeclarations.get(0);
     }
+
+    public List<Node> variableDeclarations;
+
+    public void searchVariables(Node node, String name) {
+        if (node.getType().equals(FormalGrammar.VARIABLE_DECLARATION)) {
+            if (Objects.equals(node.getChildNodes().get(0).getValue(), name)) {
+                variableDeclarations.add(node);
+            }
+            return;
+        }
+
+        List<Node> childNodes = node.getChildNodes();
+        for (Node childNode : childNodes) {
+            searchVariables(childNode, name);
+        }
+    }
+
 
     public Node findVariableDeclarationNodeInScopeByName(String name, Node scope) {
         // todo in scope-Node find variable declaration node with provided name
