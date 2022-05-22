@@ -22,7 +22,7 @@ class MathUtils is
   end
 
   method isPrime(k: Integer) : Boolean is
-    var i : Integer
-    i := 2
+    var j : Integer
+    j := 2
   end
 end

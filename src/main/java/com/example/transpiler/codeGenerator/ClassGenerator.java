@@ -43,10 +43,31 @@ public class ClassGenerator {
         TreeUtil.getClassMethods(classNode)
                 .forEach(method -> MethodGenerator.generateMethod(cu, method, signature.getFirst()));
 
-//        TreeUtil.getNestedClasses(classNode);
+        TreeUtil.getNestedClasses(classNode)
+                .forEach(nestedClass -> generateNestedClass(cu, nestedClass, mainClass));
 
         generateCode(cu, classType, signature.getFirst());
 
+    }
+
+    private void generateNestedClass(CompilationUnit cu, Node nestedClass, ClassOrInterfaceDeclaration mainClass) {
+        String className = TreeUtil.getClassSignature(nestedClass).getFirst();
+        ClassOrInterfaceDeclaration clazz = cu.addClass(className);
+
+        TreeUtil.getClassVariables(nestedClass)
+            .forEach(variable -> clazz.addField(variable.getTypeName(), variable.getName()));
+
+        TreeUtil.getConstructors(nestedClass)
+            .forEach(constructor -> ConstructorGenerator.generateConstructor(cu, constructor));
+
+        TreeUtil.getClassMethods(nestedClass)
+            .forEach(method -> MethodGenerator.generateMethod(cu, method, className));
+
+        TreeUtil.getNestedClasses(nestedClass)
+            .forEach(nested -> generateNestedClass(cu, nested, clazz));
+
+
+        mainClass.addMember(clazz);
     }
 
     private void generateCode(CompilationUnit cu, ClassType type, String name) {
