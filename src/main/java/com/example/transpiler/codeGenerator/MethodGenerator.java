@@ -1,5 +1,6 @@
 package com.example.transpiler.codeGenerator;
 
+import com.example.transpiler.codeGenerator.model.FirstClassFunction;
 import com.example.transpiler.codeGenerator.model.Method;
 import com.example.transpiler.codeGenerator.model.VariableDeclaration;
 import com.example.transpiler.syntaxer.CompilationException;
@@ -28,6 +29,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import java.util.List;
 import java.util.Objects;
+import javax.swing.plaf.nimbus.State;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -78,11 +80,23 @@ public class MethodGenerator {
             case VARIABLE_DECLARATION -> {
                 return variableDeclarationStatement(node);
             }
+            case FUNCTION_DECLARATION -> {
+                return firstClassFunctionStatement(node);
+            }
             case STATEMENT -> {
                 return generateStatementCodeForMethod(node.getChildNodes().get(0));
             }
             default -> throw new CompilationException("Unsupported type for node in METHOD: " + node.getType());
         }
+    }
+
+    private Statement firstClassFunctionStatement(Node node) {
+        FirstClassFunction function = TreeUtil.getFunctionFromDeclarationNode(node);
+        String type = "Function<" + function.getInputType() + ", " + function.getOutputType() + ">";
+        String expression = function.getVariable() + " -> " + function.getExpression();
+        String statement = String.join(" ", type, function.getName(), "=", expression);
+        Expression e = new NameExpr(statement);
+        return new ExpressionStmt(e);
     }
 
     private Statement variableDeclarationStatement(Node node) {

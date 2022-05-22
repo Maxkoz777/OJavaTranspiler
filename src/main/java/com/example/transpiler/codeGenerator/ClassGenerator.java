@@ -1,14 +1,19 @@
 package com.example.transpiler.codeGenerator;
 
 
+import com.example.transpiler.codeGenerator.model.FirstClassFunction;
+import com.example.transpiler.syntaxer.CompilationException;
 import com.example.transpiler.syntaxer.Node;
 import com.example.transpiler.syntaxer.Tree;
 import com.example.transpiler.syntaxer.TreeUtil;
 import com.example.transpiler.util.Pair;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.Modifier.Keyword;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.LambdaExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -39,6 +44,9 @@ public class ClassGenerator {
         TreeUtil.getClassVariables(classNode)
                 .forEach(variable -> mainClass.addField(variable.getTypeName(), variable.getName()));
 
+        TreeUtil.getFunctions(classNode)
+                .forEach(function -> addFirstClassFunctionToClass(function, cu, signature.getFirst()));
+
         TreeUtil.getConstructors(classNode)
             .forEach(constructor -> ConstructorGenerator.generateConstructor(cu, constructor));
 
@@ -50,6 +58,21 @@ public class ClassGenerator {
 
         generateCode(cu, classType, signature.getFirst());
 
+    }
+
+    private void addFirstClassFunctionToClass(FirstClassFunction function,
+                                                     CompilationUnit cu,
+                                                     String className) {
+        ClassOrInterfaceDeclaration clazz = cu.getClassByName(className)
+            .orElseThrow(() -> new CompilationException("class name wasn't specified for provided method"));
+        String type = getTypeForFunction(function);
+        Expression lambda = new NameExpr(function.getVariable() + " -> " + function.getExpression());
+        Keyword[] keywords = new Keyword[0];
+        clazz.addFieldWithInitializer(type, function.getName(), lambda, keywords);
+    }
+
+    private String getTypeForFunction(FirstClassFunction function) {
+        return "Function<" + function.getInputType() + ", " + function.getOutputType() + ">";
     }
 
     private void generateNestedClass(CompilationUnit cu, Node nestedClass, ClassOrInterfaceDeclaration mainClass) {

@@ -33,6 +33,7 @@ class MathUtils is
       end
 
       method empty(bt : Integer, ar : Integer) : Integer is
+        function<Integer,Integer> f := a -> Integer.Max
       end
 
       method MaxInt(a: Array[Integer]) : Integer is

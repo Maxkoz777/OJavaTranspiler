@@ -33,6 +33,7 @@ public class TreeUtil {
     public final Predicate<Node> isStatement = node -> node.getType().equals(FormalGrammar.STATEMENT);
     public final Predicate<Node> isAssignment = node -> node.getType().equals(FormalGrammar.ASSIGNMENT);
     public final Predicate<Node> isMethodDeclaration = node -> node.getType().equals(FormalGrammar.METHOD_DECLARATION);
+    public final Predicate<Node> isFunctionDeclaration = node -> node.getType().equals(FormalGrammar.FUNCTION_DECLARATION);
     public final Function<Node, Stream<Node>> convertToChildNodes = nodes -> nodes.getChildNodes().stream();
 
     /**
@@ -518,5 +519,29 @@ public class TreeUtil {
         // todo term - variable name inside some expression from "expression declaration"
         // todo find a declaration(VARIABLE_DECLARATION or PARAMETER_DECLARATION) for term
         return null;
+    }
+
+    public FirstClassFunction getFunctionFromDeclarationNode(Node node) {
+        if (!node.getType().equals(FormalGrammar.FUNCTION_DECLARATION)) {
+            throw new CompilationException("Current node isn't a first-class function declaration node");
+        }
+        List<Node> children = node.getChildNodes();
+        return new FirstClassFunction(
+            children.get(2).getValue(),
+            children.get(0).getValue(),
+            children.get(1).getValue(),
+            node,
+            children.get(3).getValue(),
+            TreeUtil.expressionTypeToString(children.get(4))
+        );
+    }
+
+    public static List<FirstClassFunction> getFunctions(Node classNode) {
+        return classNode.getChildNodes().stream()
+            .filter(isMember)
+            .flatMap(convertToChildNodes)
+            .filter(isFunctionDeclaration)
+            .map(TreeUtil::getFunctionFromDeclarationNode)
+            .toList();
     }
 }
