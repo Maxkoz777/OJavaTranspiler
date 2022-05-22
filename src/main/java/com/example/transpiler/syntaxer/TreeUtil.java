@@ -8,6 +8,7 @@ import com.example.transpiler.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -303,36 +304,36 @@ public class TreeUtil {
 
     public static ArrayList<Method> classMethods;
 
-    public ArrayList<Method> getClassMethods(Node classNode){
-        classMethods = new  ArrayList<>();
-        for (Node node: classNode.getChildNodes()){
-            if (node.getType()==FormalGrammar.MEMBER_DECLARATION){
-               if (node.getChildNodes().get(0).getType() == FormalGrammar.METHOD_DECLARATION){
-                   Node methodNode = node.getChildNodes().get(0);
-                   String methodName = methodNode.getChildNodes().get(0).getValue();
-                   List<Node> methodParamsNodeList = methodNode.getChildNodes()
-                           .stream()
-                           .filter(isParameters).toList();
-                   Node paramNode = methodParamsNodeList.isEmpty() ? null: methodParamsNodeList.get(0);
+    public ArrayList<Method> getClassMethods(Node classNode) {
+        classMethods = new ArrayList<>();
+        for (Node node : classNode.getChildNodes()) {
+            if (node.getType() == FormalGrammar.MEMBER_DECLARATION) {
+                if (node.getChildNodes().get(0).getType() == FormalGrammar.METHOD_DECLARATION) {
+                    Node methodNode = node.getChildNodes().get(0);
+                    String methodName = methodNode.getChildNodes().get(0).getValue();
+                    List<Node> methodParamsNodeList = methodNode.getChildNodes()
+                            .stream()
+                            .filter(isParameters).toList();
+                    Node paramNode = methodParamsNodeList.isEmpty() ? null : methodParamsNodeList.get(0);
 
-                   List<Node> methodBodyNodeList = methodNode.getChildNodes()
-                           .stream()
-                           .filter(isBody).toList();
-                   Node bodyNode = methodBodyNodeList.isEmpty() ? null: methodBodyNodeList.get(0);
+                    List<Node> methodBodyNodeList = methodNode.getChildNodes()
+                            .stream()
+                            .filter(isBody).toList();
+                    Node bodyNode = methodBodyNodeList.isEmpty() ? null : methodBodyNodeList.get(0);
 
-                   List<Node> methodIdentifierList = methodNode.getChildNodes()
-                           .stream()
-                           .filter(isIdentifier).skip(1).toList();
-                   String identifier = methodIdentifierList.isEmpty() ? null: methodIdentifierList.get(0).getValue();
+                    List<Node> methodIdentifierList = methodNode.getChildNodes()
+                            .stream()
+                            .filter(isIdentifier).skip(1).toList();
+                    String identifier = methodIdentifierList.isEmpty() ? null : methodIdentifierList.get(0).getValue();
 
-                   List<Parameter> parameters = new ArrayList<>();
-                   if (paramNode != null) {
-                       parameters = parameterNodeToParameters(paramNode);
-                   }
+                    List<Parameter> parameters = new ArrayList<>();
+                    if (paramNode != null) {
+                        parameters = parameterNodeToParameters(paramNode);
+                    }
 
-                   Method method = new Method(methodName, parameters, identifier, bodyNode);
-                   classMethods.add(method);
-               }
+                    Method method = new Method(methodName, parameters, identifier, bodyNode);
+                    classMethods.add(method);
+                }
             }
         }
         return classMethods;
@@ -340,17 +341,16 @@ public class TreeUtil {
 
     public List<Parameter> parameterNodeToParameters(Node node) {
         return node.getChildNodes().stream()
-            .map(param -> {
+                .map(param -> {
                     List<Node> children = param.getChildNodes();
                     String name = children.get(0).getValue();
                     String type = children.get(1).getChildNodes().get(0).getValue();
                     return new Parameter(name, type);
-            })
-            .toList();
+                })
+                .toList();
     }
 
     /**
-     *
      * @param tree is a tree containing possible types
      * @return list of all types met in our tree (e.g. main class name + class name fro )
      */
@@ -361,7 +361,7 @@ public class TreeUtil {
 
 
     public Node getNodeScope(Tree tree, Node node) {
-        Node res = findNodeScope(tree.getRoot (), node, null);
+        Node res = findNodeScope(tree.getRoot(), node, null);
         return res;
     }
 
@@ -378,7 +378,7 @@ public class TreeUtil {
                 currentScope = n;
             }
 
-            for (Node child: n.getChildNodes()) {
+            for (Node child : n.getChildNodes()) {
                 Node result = findNodeScope(child, s, currentScope);
                 if (result != null) {
                     return result;
@@ -388,12 +388,14 @@ public class TreeUtil {
         return null;
     }
 
-    /** returns true if this IF_STATEMENT has else branch */
+    /**
+     * returns true if this IF_STATEMENT has else branch
+     */
     public boolean isElseCondition(Node node) {
         Integer bodyCount = 0;
-        for (Node childNode: node.getChildNodes()){
-            if (childNode.getType()==FormalGrammar.BODY){
-                bodyCount= bodyCount+1;
+        for (Node childNode : node.getChildNodes()) {
+            if (childNode.getType() == FormalGrammar.BODY) {
+                bodyCount = bodyCount + 1;
             }
         }
         return bodyCount == 2;
@@ -409,6 +411,7 @@ public class TreeUtil {
         return null;
     }
 
+
     public boolean inScope(Node target, Node scope) {
         // todo return true if target is inside scope
         // todo it can be a child of a child of provided scope with any depth of such including
@@ -422,11 +425,11 @@ public class TreeUtil {
 
     public Tree getTreeForClassName(String className) {
         return TypeChecker.trees.stream()
-            .filter(tree -> tree.getClassName().equals(className))
-            .findFirst()
-            .orElseThrow(
-                () -> new TypeCheckerException("No tree with class named: " + className)
-            );
+                .filter(tree -> tree.getClassName().equals(className))
+                .findFirst()
+                .orElseThrow(
+                        () -> new TypeCheckerException("No tree with class named: " + className)
+                );
     }
 
     public String getInferredTypeForNodeInClass(Node node, String className) {
@@ -436,13 +439,36 @@ public class TreeUtil {
     }
 
     public Node getMethodDeclarationNodeByMethodName(String name, Tree tree) {
-        // todo find decl node for method name if such method exist
-        // todo there are no overloading in our language => no duplicate method names
-        return null;
+        methodDeclarations = new ArrayList<>();
+        searchMethods(tree.getRoot(), name);
+        if (methodDeclarations.size()>1){
+            throw new CompilationException("Duplicated method declarations detected. Overloading is not supported.");
+        }
+        else if (methodDeclarations.size()==0){
+            return null;
+        }
+        else return methodDeclarations.get(0);
+    }
+
+    public List<Node> methodDeclarations;
+
+    public void searchMethods(Node node, String name) {
+        if (node.getType().equals(FormalGrammar.METHOD_DECLARATION)) {
+            if (Objects.equals(node.getChildNodes().get(0).getValue(), name)) {
+                methodDeclarations.add(node);
+            }
+            return;
+        }
+
+        List<Node> childNodes = node.getChildNodes();
+        for (Node childNode : childNodes) {
+            searchMethods(childNode, name);
+        }
     }
 
     public Node getVariableDeclarationByVariableName(String name, Tree tree) {
         // todo find decl node for method name if such method exist
+
         return null;
     }
 
