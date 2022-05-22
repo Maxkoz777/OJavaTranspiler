@@ -471,13 +471,13 @@ public class TreeUtil {
         // итерация по скоупам
         Node result;
         Node currentScope = scope;
-        while (!currentScope.getType().equals(FormalGrammar.CLASS_DECLARATION)) {
+        do {
             result = findVariableDeclarationNodeInScopeByName(name, currentScope);
             if (result == null) {
                 currentScope = getNodeScope(tree, currentScope);
                 break;
             }
-        }
+        }while (currentScope.getType().equals(FormalGrammar.CLASS_DECLARATION));
 
         variableDeclarations = new ArrayList<>();
         searchVariables(currentScope, name);
