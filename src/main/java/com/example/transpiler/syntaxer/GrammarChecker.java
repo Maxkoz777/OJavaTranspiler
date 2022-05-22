@@ -184,7 +184,13 @@ public class GrammarChecker {
                 } catch (Exception e) {
                     currentIndex = validState;
                     node.deleteLastChild();
-                    break;
+                    try {
+                        specifyFunctionDeclaration(node);
+                    } catch (Exception exception1) {
+                        currentIndex = validState;
+                        node.deleteLastChild();
+                        break;
+                    }
                 }
             }
         }
