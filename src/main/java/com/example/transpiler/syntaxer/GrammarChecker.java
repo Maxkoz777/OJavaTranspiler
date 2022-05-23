@@ -91,10 +91,34 @@ public class GrammarChecker {
                 } catch (CompilationException exception1) {
                     currentIndex = validIndex;
                     node.deleteLastChild();
-                    specifyNestedClassDeclaration(node);
+                    try {
+                        specifyNestedClassDeclaration(node);
+                    } catch (CompilationException exception2) {
+                        currentIndex = validIndex;
+                        node.deleteLastChild();
+                        specifyFunctionDeclaration(node);
+                    }
+
                 }
             }
         }
+    }
+
+    public void specifyFunctionDeclaration(Node parentNode) {
+        Node node = tree.addNode(FormalGrammar.FUNCTION_DECLARATION, parentNode);
+        verifyToken("function");
+        verifyToken("<");
+        specifyIdentifier(node);
+        verifyToken(",");
+        specifyIdentifier(node);
+        verifyToken(">");
+        specifyIdentifier(node);
+        verifyToken(":");
+        verifyToken("=");
+        specifyIdentifier(node);
+        verifyToken("-");
+        verifyToken(">");
+        specifyExpression(node);
     }
 
     public void specifyNestedClassDeclaration(Node parentNode){
@@ -160,7 +184,13 @@ public class GrammarChecker {
                 } catch (Exception e) {
                     currentIndex = validState;
                     node.deleteLastChild();
-                    break;
+                    try {
+                        specifyFunctionDeclaration(node);
+                    } catch (Exception exception1) {
+                        currentIndex = validState;
+                        node.deleteLastChild();
+                        break;
+                    }
                 }
             }
         }
@@ -206,13 +236,28 @@ public class GrammarChecker {
         specifyIdentifier(node);
         verifyToken(":");
         verifyToken("=");
-        specifyExpression(node);
+        int validState = currentIndex;
+        try {
+            specifyMathExpression(node);
+        } catch (Exception e) {
+            currentIndex = validState;
+            node.deleteLastChild();
+            specifyExpression(node);
+        }
+
     }
 
     private void specifyWhileLoop(Node parentNode) {
         Node node = tree.addNode(FormalGrammar.WHILE_LOOP, parentNode);
         verifyToken("while");
-        specifyExpression(node);
+        int validState = currentIndex;
+        try {
+            specifyMathExpression(node);
+        } catch (Exception e) {
+            currentIndex = validState;
+            node.deleteLastChild();
+            specifyExpression(node);
+        }
         verifyToken("loop");
         specifyBody(node);
         verifyToken("end");
@@ -221,7 +266,14 @@ public class GrammarChecker {
     private void specifyIfStatement(Node parentNode) {
         Node node = tree.addNode(FormalGrammar.IF_STATEMENT, parentNode);
         verifyToken("if");
-        specifyExpression(node);
+        int validState = currentIndex;
+        try {
+            specifyMathExpression(node);
+        } catch (Exception e) {
+            currentIndex = validState;
+            node.deleteLastChild();
+            specifyExpression(node);
+        }
         verifyToken("then");
         specifyBody(node);
         if ("else".equals(lexeme())) {
@@ -234,12 +286,13 @@ public class GrammarChecker {
     private void specifyReturnStatement(Node parentNode) {
         Node node = tree.addNode(FormalGrammar.RETURN_STATEMENT, parentNode);
         verifyToken("return");
-        int validIndex = currentIndex;
+        int validState = currentIndex;
         try {
-            specifyExpression(node);
-        } catch (Exception ignored) {
-            currentIndex = validIndex;
+            specifyMathExpression(node);
+        } catch (Exception e) {
+            currentIndex = validState;
             node.deleteLastChild();
+            specifyExpression(node);
         }
     }
 
@@ -258,6 +311,33 @@ public class GrammarChecker {
                 break;
             }
         }
+    }
+
+    private void specifyMathExpression(Node parentNode) {
+        Node node = tree.addNode(FormalGrammar.MATH_EXPRESSION, parentNode);
+        specifyExpression(node);
+        specifyOperation(node);
+        specifyExpression(node);
+    }
+
+    private void specifyOperation(Node parentNode) {
+        Node node = tree.addNode(FormalGrammar.OPERATION, parentNode);
+        node.setValue(verifyOperation());
+    }
+
+    private String verifyOperation() {
+        String operation = "";
+        if (tokenType().equals(TokenType.OPERATOR)) {
+            operation += lexeme();
+            incrementIndex();
+        } else {
+            throw new CompilationException("Not an operator");
+        }
+        if (tokenType().equals(TokenType.OPERATOR)) {
+            operation += lexeme();
+            incrementIndex();
+        }
+        return operation;
     }
 
     private void specifyArguments(Node parentNode) {

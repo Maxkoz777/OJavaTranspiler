@@ -91,7 +91,7 @@ public class TypeChecker {
             .toList();
         checkProblemVariables(problemVariables, unit.getAssignments());
         if (isTreeArrayReady) {
-            //majorCheck();
+//            majorCheck();
         }
     }
 
@@ -126,6 +126,7 @@ public class TypeChecker {
             switch (variableExpression.getType()) {
                 case VARIABLE -> termDeclaration = TreeUtil.getVariableDeclarationByVariableName(
                     variableExpression.getTerm(),
+                    debtVariable.getScope(),
                     debtVariable.getTree()
                 );
                 case METHOD -> termDeclaration = TreeUtil.getMethodDeclarationNodeByMethodName(

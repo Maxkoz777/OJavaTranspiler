@@ -1,10 +1,12 @@
 package com.example.transpiler.codeGenerator;
 
+import com.example.transpiler.codeGenerator.model.FirstClassFunction;
 import com.example.transpiler.codeGenerator.model.Method;
 import com.example.transpiler.codeGenerator.model.VariableDeclaration;
 import com.example.transpiler.syntaxer.CompilationException;
 import com.example.transpiler.syntaxer.Node;
 import com.example.transpiler.syntaxer.TreeUtil;
+import com.example.transpiler.typeChecker.TypeCheckerException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Modifier.Keyword;
@@ -28,6 +30,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import java.util.List;
 import java.util.Objects;
+import javax.swing.plaf.nimbus.State;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -78,11 +81,23 @@ public class MethodGenerator {
             case VARIABLE_DECLARATION -> {
                 return variableDeclarationStatement(node);
             }
+            case FUNCTION_DECLARATION -> {
+                return firstClassFunctionStatement(node);
+            }
             case STATEMENT -> {
                 return generateStatementCodeForMethod(node.getChildNodes().get(0));
             }
             default -> throw new CompilationException("Unsupported type for node in METHOD: " + node.getType());
         }
+    }
+
+    private Statement firstClassFunctionStatement(Node node) {
+        FirstClassFunction function = TreeUtil.getFunctionFromDeclarationNode(node);
+        String type = "Function<" + function.getInputType() + ", " + function.getOutputType() + ">";
+        String expression = function.getVariable() + " -> " + function.getExpression();
+        String statement = String.join(" ", type, function.getName(), "=", expression);
+        Expression e = new NameExpr(statement);
+        return new ExpressionStmt(e);
     }
 
     private Statement variableDeclarationStatement(Node node) {
@@ -152,8 +167,22 @@ public class MethodGenerator {
     }
 
     private Expression expressionFromNode(Node expression) {
-        String line = TreeUtil.expressionTypeToString(expression);
-        return expressionFromString(line);
+
+        switch (expression.getType()) {
+            case EXPRESSION -> {
+                String line = TreeUtil.expressionTypeToString(expression);
+                return expressionFromString(line);
+            }
+            case MATH_EXPRESSION -> {
+                String first = TreeUtil.expressionTypeToString(expression.getChildNodes().get(0));
+                String operation = expression.getChildNodes().get(1).getValue();
+                String second = TreeUtil.expressionTypeToString(expression.getChildNodes().get(2));
+                return expressionFromString(first + " " + operation + " " + second);
+            }
+            default -> throw new TypeCheckerException("Provided node should be an expression");
+        }
+
+
     }
 
     private Expression expressionFromString(String line) {
