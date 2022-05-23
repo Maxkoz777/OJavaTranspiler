@@ -343,6 +343,10 @@ public class GrammarChecker {
     private void specifyArguments(Node parentNode) {
         Node node = tree.addNode(FormalGrammar.ARGUMENTS, parentNode);
         verifyToken("(");
+        if (lexeme().equals(")")) {
+            verifyToken(")");
+            return;
+        }
         specifyExpression(node);
         while (lexeme().equals(",")) {
             verifyToken(",");
