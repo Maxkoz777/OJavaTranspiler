@@ -477,29 +477,53 @@ public class TreeUtil {
                 currentScope = getNodeScope(tree, currentScope);
                 break;
             }
-        }while (currentScope.getType().equals(FormalGrammar.CLASS_DECLARATION));
+        } while (currentScope.getType().equals(FormalGrammar.CLASS_DECLARATION));
 
         variableDeclarations = new ArrayList<>();
-        searchVariables(currentScope, name);
-        result = variableDeclarations.get(0);
+        parameterDeclarations = new ArrayList<>();
 
-        return result;
+        searchParameters(currentScope, name);
+        if (parameterDeclarations.size()>0){
+            return parameterDeclarations.get(0);
+        }
+
+        searchVariables(currentScope, name);
+        if (variableDeclarations.size()>0) {
+            return variableDeclarations.get(0);
+        }
+        else return null;
     }
 
     public List<Node> variableDeclarations;
+    public List<Node> parameterDeclarations;
 
 
     public Node findVariableDeclarationNodeInScopeByName(String name, Node scope) {
         variableDeclarations = new ArrayList<>();
-        searchVariables(scope, name);
+        parameterDeclarations = new ArrayList<>();
 
-        // if scope is a method - check parameters first todo
-
-        if (variableDeclarations.size() == 0) {
-            return null;
-        } else return variableDeclarations.get(0);
+        // if scope is a method - check parameters first
+        if (scope.getType() == FormalGrammar.METHOD_DECLARATION) {
+            searchParameters(scope, name);
+            if (parameterDeclarations.size() == 0){
+                searchVariables(scope, name);
+                if (variableDeclarations.size()==0){
+                    return null;
+                }
+                else return variableDeclarations.get(0);
+            }
+            else return parameterDeclarations.get(0);
+        }
+        if (scope.getType() == FormalGrammar.CLASS_DECLARATION){
+            searchVariables(scope, name);
+            if (variableDeclarations.size() == 0) {
+                return null;
+            } else return variableDeclarations.get(0);
+        }
+        else return null;
     }
 
+    //........................................................................//
     public void searchVariables(Node node, String name) {
         if (node.getType().equals(FormalGrammar.VARIABLE_DECLARATION)) {
             if (Objects.equals(node.getChildNodes().get(0).getValue(), name)) {
@@ -513,6 +537,21 @@ public class TreeUtil {
             searchVariables(childNode, name);
         }
     }
+
+    public void searchParameters(Node node, String name) {
+        if (node.getType().equals(FormalGrammar.PARAMETER_DECLARATION)) {
+            if (Objects.equals(node.getChildNodes().get(0).getValue(), name)) {
+                parameterDeclarations.add(node);
+            }
+            return;
+        }
+
+        List<Node> childNodes = node.getChildNodes();
+        for (Node childNode : childNodes) {
+            searchParameters(childNode, name);
+        }
+    }
+    //........................................................................//
 
     public Node getDeclarationNodeForLocalName(String term, Node expressionDeclaration, Tree tree) {
         // todo term - variable name inside some expression from "expression declaration"
