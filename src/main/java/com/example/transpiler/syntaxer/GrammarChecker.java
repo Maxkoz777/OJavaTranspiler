@@ -250,7 +250,14 @@ public class GrammarChecker {
     private void specifyWhileLoop(Node parentNode) {
         Node node = tree.addNode(FormalGrammar.WHILE_LOOP, parentNode);
         verifyToken("while");
-        specifyExpression(node);
+        int validState = currentIndex;
+        try {
+            specifyMathExpression(node);
+        } catch (Exception e) {
+            currentIndex = validState;
+            node.deleteLastChild();
+            specifyExpression(node);
+        }
         verifyToken("loop");
         specifyBody(node);
         verifyToken("end");
@@ -259,7 +266,14 @@ public class GrammarChecker {
     private void specifyIfStatement(Node parentNode) {
         Node node = tree.addNode(FormalGrammar.IF_STATEMENT, parentNode);
         verifyToken("if");
-        specifyExpression(node);
+        int validState = currentIndex;
+        try {
+            specifyMathExpression(node);
+        } catch (Exception e) {
+            currentIndex = validState;
+            node.deleteLastChild();
+            specifyExpression(node);
+        }
         verifyToken("then");
         specifyBody(node);
         if ("else".equals(lexeme())) {
@@ -272,12 +286,13 @@ public class GrammarChecker {
     private void specifyReturnStatement(Node parentNode) {
         Node node = tree.addNode(FormalGrammar.RETURN_STATEMENT, parentNode);
         verifyToken("return");
-        int validIndex = currentIndex;
+        int validState = currentIndex;
         try {
-            specifyExpression(node);
-        } catch (Exception ignored) {
-            currentIndex = validIndex;
+            specifyMathExpression(node);
+        } catch (Exception e) {
+            currentIndex = validState;
             node.deleteLastChild();
+            specifyExpression(node);
         }
     }
 
