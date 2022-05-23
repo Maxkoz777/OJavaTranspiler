@@ -236,7 +236,15 @@ public class GrammarChecker {
         specifyIdentifier(node);
         verifyToken(":");
         verifyToken("=");
-        specifyExpression(node);
+        int validState = currentIndex;
+        try {
+            specifyMathExpression(node);
+        } catch (Exception e) {
+            currentIndex = validState;
+            node.deleteLastChild();
+            specifyExpression(node);
+        }
+
     }
 
     private void specifyWhileLoop(Node parentNode) {
@@ -288,6 +296,33 @@ public class GrammarChecker {
                 break;
             }
         }
+    }
+
+    private void specifyMathExpression(Node parentNode) {
+        Node node = tree.addNode(FormalGrammar.MATH_EXPRESSION, parentNode);
+        specifyExpression(node);
+        specifyOperation(node);
+        specifyExpression(node);
+    }
+
+    private void specifyOperation(Node parentNode) {
+        Node node = tree.addNode(FormalGrammar.OPERATION, parentNode);
+        node.setValue(verifyOperation());
+    }
+
+    private String verifyOperation() {
+        String operation = "";
+        if (tokenType().equals(TokenType.OPERATOR)) {
+            operation += lexeme();
+            incrementIndex();
+        } else {
+            throw new CompilationException("Not an operator");
+        }
+        if (tokenType().equals(TokenType.OPERATOR)) {
+            operation += lexeme();
+            incrementIndex();
+        }
+        return operation;
     }
 
     private void specifyArguments(Node parentNode) {

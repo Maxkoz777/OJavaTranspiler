@@ -6,6 +6,7 @@ import com.example.transpiler.codeGenerator.model.VariableDeclaration;
 import com.example.transpiler.syntaxer.CompilationException;
 import com.example.transpiler.syntaxer.Node;
 import com.example.transpiler.syntaxer.TreeUtil;
+import com.example.transpiler.typeChecker.TypeCheckerException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Modifier.Keyword;
@@ -166,8 +167,22 @@ public class MethodGenerator {
     }
 
     private Expression expressionFromNode(Node expression) {
-        String line = TreeUtil.expressionTypeToString(expression);
-        return expressionFromString(line);
+
+        switch (expression.getType()) {
+            case EXPRESSION -> {
+                String line = TreeUtil.expressionTypeToString(expression);
+                return expressionFromString(line);
+            }
+            case MATH_EXPRESSION -> {
+                String first = TreeUtil.expressionTypeToString(expression.getChildNodes().get(0));
+                String operation = expression.getChildNodes().get(1).getValue();
+                String second = TreeUtil.expressionTypeToString(expression.getChildNodes().get(2));
+                return expressionFromString(first + " " + operation + " " + second);
+            }
+            default -> throw new TypeCheckerException("Provided node should be an expression");
+        }
+
+
     }
 
     private Expression expressionFromString(String line) {

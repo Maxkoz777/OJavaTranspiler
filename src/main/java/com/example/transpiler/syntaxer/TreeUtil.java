@@ -143,11 +143,18 @@ public class TreeUtil {
         assignments.forEach(assignment ->
         {
             String varName = assignment.getChildNodes().get(0).getValue();
-            String expression = expressionTypeToString(assignment.getChildNodes().get(1));
+            String expression;
+            if (assignment.getChildNodes().get(1).getType().equals(FormalGrammar.EXPRESSION)) {
+                expression = expressionTypeToString(assignment.getChildNodes().get(1));
+            } else {
+                List<Node> children = assignment.getChildNodes().get(1).getChildNodes();
+                expression = expressionTypeToString(children.get(0)) + " " +
+                    children.get(1).getValue() + " " + expressionTypeToString(children.get(2));
+            }
             declaredAssignments.add(new Assignment(
-                    varName,
-                    expression,
-                    assignment
+                varName,
+                expression,
+                assignment
             ));
         });
         return declaredAssignments;

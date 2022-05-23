@@ -3,7 +3,9 @@ class Book is
   method empty(bt : Integer, ar : Integer) : Integer is
 
     var k : Boolean
-    k := bt = ar
+    k := bt >= ar
+    k := 3 + 5
+    k := m < z
 
   end
 
