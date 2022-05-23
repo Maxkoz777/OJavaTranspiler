@@ -1,2 +1,10 @@
 class Book is
+
+  method empty(bt : Integer, ar : Integer) : Integer is
+
+    var k : Boolean
+    k := bt = ar
+
+  end
+
 end
