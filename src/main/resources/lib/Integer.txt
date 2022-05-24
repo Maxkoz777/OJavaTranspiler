@@ -1,5 +1,7 @@
 class Integer is
-  this(p: Integer) is
+  var int: Integer
+  this(val: Integer) is
+     int :=val
   end
 
 
@@ -9,43 +11,64 @@ class Integer is
 
 
  method Plus(p:Integer) : Integer is
+    return int+p
  end
  method Plus(p:Real) : Real is
+    return int+p
  end
  method Minus(p: Integer) : Integer is
+    return int-p
  end
  method Minus(p: Real) : Real is
+    return int-p
  end
  method Mult(p: Integer) : Integer is
+    return p*int
  end
  method Mult(p: Real) : Real is
+     return p*int
  end
  method Div(p: Real) : Real is
+     var divided: Real
+     var partial: Integer
+     divided := int/p
+     partial := int%p
+     return divided-partial
  end
  method Div(p: Integer) : Real is
+     return p/int
  end
- method Rem(p: Integer) : Integer is
- end
+
 
 
  method Less(p: Integer) : Boolean is
+    return int<p
  end
  method Less(p: Real) : Boolean is
+     return int<p
  end
  method LessEqual(p: Integer) : Boolean is
+     return int<=p
  end
  method LessEqual(p: Real) : Boolean is
+     return int<=p
  end
  method Greater(p: Integer) : Boolean is
+     return int>p
  end
  method Greater(p: Real) : Boolean is
+     return int>p
  end
  method GreaterEqual(p: Integer) : Boolean is
+      return int>=p
  end
  method GreaterEqual(p: Real) : Boolean is
+      return int>=p
  end
  method Equal(p: Integer) : Boolean is
+      return int==p
  end
  method Equal(p: Real) : Boolean is
+      return p==int
  end
 end
