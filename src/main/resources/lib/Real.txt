@@ -1,49 +1,50 @@
-class Integer is
+class Real is
   var real: Real
+
   this(realVal: Real) is
-     real :=realVal
+     real := realVal
   end
 
- method RealPlus(r1:Real) : Real is
-    return real+r1
+ method RealPlus(r1: Real) : Real is
+    return real + r1
  end
 
  method RealMinus(r2: Real) : Real is
-    return real-r2
+    return real - r2
  end
 
  method RealMult(r3: Real) : Real is
-     return r3*real
+     return r3 * real
  end
 
  method RealLess(r4: Integer) : Boolean is
-    return real<r4
+    return real < r4
  end
  method RealLess(r5: Real) : Boolean is
-     return real<r5
+     return real < r5
  end
  method RealLessEqual(r6: Integer) : Boolean is
-     return real<=r6
+     return real <= r6
  end
  method RealLessEqual(r7: Real) : Boolean is
-     return real<=r7
+     return real <= r7
  end
  method RealGreater(r8: Integer) : Boolean is
-     return real>r8
+     return real > r8
  end
  method RealGreater(r9: Real) : Boolean is
-     return real>r9
+     return real > r9
  end
  method RealGreaterEqual(s1: Integer) : Boolean is
-      return real>=s1
+      return real >= s1
  end
  method RealGreaterEqual(s2: Real) : Boolean is
-      return real>=s2
+      return real >= s2
  end
  method RealEqual(s3: Integer) : Boolean is
-      return real==s3
+      return real == s3
  end
  method RealEqual(s4: Real) : Boolean is
-      return s4==real
+      return s4 == real
  end
 end

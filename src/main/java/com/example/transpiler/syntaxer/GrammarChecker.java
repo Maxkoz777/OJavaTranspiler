@@ -329,7 +329,7 @@ public class GrammarChecker {
         String operation = "";
         if (
             tokenType().equals(TokenType.OPERATOR)
-            && List.of("+", "-", "/", "==", ">=", ">", "<=", "<").contains(lexeme())
+            && List.of("+", "-", "/", "==", ">=", ">", "<=", "<", "*", "=").contains(lexeme())
         ) {
             operation += lexeme();
             incrementIndex();

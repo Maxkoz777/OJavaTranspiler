@@ -1,50 +1,49 @@
 class Integer is
   var int: Integer
+
   this(intVal: Integer) is
-     int :=intVal
+     int := intVal
   end
 
 
  var Min : Integer
  var Max : Integer
 
-
-
  method Plus(p1:Integer) : Integer is
-    return int+p1
+    return int + p1
  end
 
  method Minus(p2: Integer) : Integer is
-    return int-p2
+    return int - p2
  end
 
  method Mult(p3: Integer) : Integer is
-    return p3*int
+    return p3 * int
  end
 
  method Div(p4: Integer) : Integer is
-     return p4/int
+     return p4 / int
  end
 
 
  method Less(p5: Integer) : Boolean is
-    return int<p5
+    return int < p5
  end
 
  method LessEqual(p6: Integer) : Boolean is
-     return int<=p6
+     return int <= p6
  end
 
  method Greater(p7: Integer) : Boolean is
-     return int>p7
+     return int > p7
  end
 
  method GreaterEqual(p8: Integer) : Boolean is
-      return int>=p8
+      return int >= p8
  end
 
  method Equal(p9: Integer) : Boolean is
-      return int==p9
+      return int == p9
  end
 
 
