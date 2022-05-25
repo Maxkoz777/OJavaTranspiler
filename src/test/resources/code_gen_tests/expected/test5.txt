@@ -1,0 +1,8 @@
+package com.example.transpiler.generated;
+
+public class B {
+
+    Integer b;
+
+    Integer b1;
+}

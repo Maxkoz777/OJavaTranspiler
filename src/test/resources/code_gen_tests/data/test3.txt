@@ -1,0 +1,13 @@
+class RealValues extends AnyValue is
+ this(p: Real) is
+    var Min : Real
+ end
+ var Max : Real
+ var Epsilon : Real
+ method Plus(a:Real, b:Real) : Real is
+  a := a.Plus(b)
+ end
+ method Minus(a:Real, b:Real) : Real is
+   a := a.Minus(b)
+  end
+end

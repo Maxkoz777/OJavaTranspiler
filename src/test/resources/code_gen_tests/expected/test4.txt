@@ -1,0 +1,6 @@
+package com.example.transpiler.generated;
+
+public class C {
+
+    T m;
+}

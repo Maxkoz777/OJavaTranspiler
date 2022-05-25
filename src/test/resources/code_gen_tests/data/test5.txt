@@ -1,0 +1,4 @@
+class B is
+  var b : Integer
+  var b1 : Integer
+end

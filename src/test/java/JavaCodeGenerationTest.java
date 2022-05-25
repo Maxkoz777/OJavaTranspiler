@@ -37,4 +37,57 @@ class JavaCodeGenerationTest {
         assertEquals(expected, result);
     }
 
+    @Test
+    void test2() throws IOException {
+        int index= 3;
+        String program = getProgram(index);
+        var tokens = Lexer.getTokensFromCode(program);
+        Tree tree;
+        String stringWithTokens = tokens.toString();
+        log.info("Array with tokens: {}", stringWithTokens);
+        tree = GrammarChecker.checkGrammar(tokens);
+        String result = ClassGenerator.generateClassWithoutFileCreation(tree, ClassType.SOURCE);
+        String expected = new String(
+                getClass()
+                        .getResourceAsStream("code_gen_tests/expected/test" + index + ".txt")
+                        .readAllBytes()
+        );
+        assertEquals(expected, result);
+    }
+    @Test
+    void test3() throws IOException {
+        int index= 4;
+        String program = getProgram(index);
+        var tokens = Lexer.getTokensFromCode(program);
+        Tree tree;
+        String stringWithTokens = tokens.toString();
+        log.info("Array with tokens: {}", stringWithTokens);
+        tree = GrammarChecker.checkGrammar(tokens);
+        String result = ClassGenerator.generateClassWithoutFileCreation(tree, ClassType.SOURCE);
+        String expected = new String(
+                getClass()
+                        .getResourceAsStream("code_gen_tests/expected/test" + index + ".txt")
+                        .readAllBytes()
+        );
+        System.out.println(result);
+        assertEquals(expected, result);
+    }
+    @Test
+    void test4() throws IOException {
+        int index= 5;
+        String program = getProgram(index);
+        var tokens = Lexer.getTokensFromCode(program);
+        Tree tree;
+        String stringWithTokens = tokens.toString();
+        log.info("Array with tokens: {}", stringWithTokens);
+        tree = GrammarChecker.checkGrammar(tokens);
+        String result = ClassGenerator.generateClassWithoutFileCreation(tree, ClassType.SOURCE);
+        String expected = new String(
+                getClass()
+                        .getResourceAsStream("code_gen_tests/expected/test" + index + ".txt")
+                        .readAllBytes()
+        );
+        assertEquals(expected, result);
+    }
+
 }
