@@ -1,10 +1,12 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.example.transpiler.lexer.Lexer;
 import com.example.transpiler.syntaxer.GrammarChecker;
 import com.example.transpiler.syntaxer.Tree;
 import com.example.transpiler.syntaxer.TreeUtil;
 import com.example.transpiler.typeChecker.TypeChecker;
+import com.example.transpiler.typeChecker.TypeCheckerException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -49,8 +51,8 @@ class TypeCheckerTest {
 
     @AfterEach
     void after() {
-        TypeChecker.knownTypes = Collections.emptyList();
-        TypeChecker.trees= Collections.emptyList();
+        TypeChecker.knownTypes.clear();
+        TypeChecker.trees.clear();
     }
 
     @Test
@@ -107,6 +109,24 @@ class TypeCheckerTest {
         TypeChecker.knownTypes.add(tree.getClassName());
         TypeChecker.check(tree);
 
+    }
+
+    @Test
+    void typeCheckerTest5() throws IOException {
+
+        String program = getProgram(6);
+        var tokens = Lexer.getTokensFromCode(program);
+        Tree tree;
+        String stringWithTokens = tokens.toString();
+        log.info("Array with tokens: {}", stringWithTokens);
+        tree = GrammarChecker.checkGrammar(tokens);
+        TypeChecker.knownTypes.add(tree.getClassName());
+
+        Exception exception = assertThrows(
+            TypeCheckerException.class,
+            () -> TypeChecker.check(tree)
+        );
+        assertEquals("No definition for variable sdfwlijfnvsdl", exception.getMessage());
     }
 
 }
