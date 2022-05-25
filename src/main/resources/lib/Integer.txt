@@ -1,8 +1,8 @@
 class Integer is
-  var int: Integer
+  var libInt: Integer
 
   this(intVal: Integer) is
-     int := intVal
+     libInt := intVal
   end
 
 
@@ -10,40 +10,40 @@ class Integer is
  var Max : Integer
 
  method Plus(p1:Integer) : Integer is
-    return int + p1
+    return libInt + p1
  end
 
  method Minus(p2: Integer) : Integer is
-    return int - p2
+    return libInt - p2
  end
 
  method Mult(p3: Integer) : Integer is
-    return p3 * int
+    return p3 * libInt
  end
 
  method Div(p4: Integer) : Integer is
-     return p4 / int
+     return p4 / libInt
  end
 
 
  method Less(p5: Integer) : Boolean is
-    return int < p5
+    return libInt < p5
  end
 
  method LessEqual(p6: Integer) : Boolean is
-     return int <= p6
+     return libInt <= p6
  end
 
  method Greater(p7: Integer) : Boolean is
-     return int > p7
+     return libInt > p7
  end
 
  method GreaterEqual(p8: Integer) : Boolean is
-      return int >= p8
+      return libInt >= p8
  end
 
  method Equal(p9: Integer) : Boolean is
-      return int == p9
+      return libInt == p9
  end
 
 

@@ -1,7 +1,7 @@
 class Boolean is
  var bool: Boolean
- this(boolVal:Boolean) is
-    bool :=boolVal
+ this(boolVal: Boolean) is
+    bool := boolVal
  end
 
  method toInteger() : Integer is
