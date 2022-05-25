@@ -1,6 +1,0 @@
-class Char is
-      var char: Char
-      this(val: Char) is
-        char := val
-      end
-end

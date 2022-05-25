@@ -33,7 +33,7 @@ public class TypeChecker {
     private List<ClassDeclaration> classDeclarations = new ArrayList<>();
     private boolean isTreeArrayReady = false;
     private List<DebtVariable> variablesToCheck = new ArrayList<>();
-    private List<String> knownTypes = new ArrayList<>();
+    public List<String> knownTypes = new ArrayList<>();
     private Tree currentTree;
 
     // Maps will consume memory, but we will have linear search for types among classes
@@ -131,6 +131,28 @@ public class TypeChecker {
             return typeFromSearchInAnotherTree(variableExpression);
         }
 
+        if (variableExpression.getTerm().equals("this")) {
+            String expression = variableExpression.getWholeExpression();
+            TypeRecursiveDefinitionDto recursiveDefinitionDto = getTypeRecursiveDefinitionDto(
+                expression.substring(expression.indexOf('.') + 1)
+            );
+            String term = recursiveDefinitionDto.getTerm();
+            Tree tree = debtVariable.getTree();
+            Node decl = recursiveDefinitionDto.getType().equals(ExpressionResult.METHOD)
+                ? TreeUtil.getMethodDeclarationNodeByMethodName(term, tree)
+                : TreeUtil.getVariableDeclarationByVariableName(
+                    term,
+                    TreeUtil.getMainClassNode(tree),
+                    tree
+                );
+            return getTypeRecursively(
+                term,
+                decl,
+                recursiveDefinitionDto.getExpression(),
+                tree
+            );
+        }
+
         Node termDeclaration = TreeUtil.findVariableDeclarationNodeInScopeByName(
             variableExpression.getTerm(),
             TreeUtil.getNodeScope(
@@ -221,7 +243,7 @@ public class TypeChecker {
                                                               TreeUtil.getNodeScope(tree, variableExpression.getAssignmentNode()),
                                                               tree
                 ),
-            expressions[0],
+            first.getExpression(),
             tree
         );
 
@@ -233,16 +255,19 @@ public class TypeChecker {
                                                               TreeUtil.getNodeScope(tree, variableExpression.getAssignmentNode()),
                                                               tree
                 ),
-            expressions[2],
+            second.getExpression(),
             tree
         );
 
+        Set<String> set = new HashSet<>();
+        set.add(firstType.toUpperCase(Locale.ROOT));
+        set.add(secondType.toUpperCase(Locale.ROOT));
+
         if (
-            !firstType.equals(secondType)
-            && !Set.of(firstType.toUpperCase(Locale.ROOT), secondType.toUpperCase(Locale.ROOT))
-                .equals(Set.of("INTEGER", "REAL"))
+            !firstType.equalsIgnoreCase(secondType)
+            && !set.equals(Set.of("INTEGER", "REAL"))
         ) {
-            throw new TypeCheckerException("Trying to apply " + operation + " to types: " + firstType + " & " + secondType);
+            throw new TypeCheckerException("Trying to apply operation \"" + operation + "\" to types: " + firstType + " & " + secondType);
         }
 
         if (boolOperations.contains(operation)) {
@@ -273,8 +298,12 @@ public class TypeChecker {
 
         String type = null;
 
+        if (Objects.isNull(termDeclaration)) {
+            throw new TypeCheckerException("No definition for variable " + term);
+        }
+
         switch (termDeclaration.getType()) {
-            case METHOD_DECLARATION -> {
+            case FUNCTION_DECLARATION, METHOD_DECLARATION -> {
                 String returnType = getMethodReturnTypeByDeclaration(termDeclaration);
                 if (wholeExpression.isEmpty()) {
                     type = returnType;
@@ -334,6 +363,8 @@ public class TypeChecker {
                     } else {
                         if (!declaration.getType().equals(JavaType.UNDEFINED)) {
                             return declaration.getType().name();
+                        } else if (!declaration.getTypeName().isEmpty()) {
+                            return declaration.getTypeName();
                         } else {
                             throw new TypeCheckerException("No type defined for variable " + term + " in class " + tree.getClassName());
                         }
@@ -376,8 +407,13 @@ public class TypeChecker {
         return type;
     }
 
-    private static TypeRecursiveDefinitionDto getTypeRecursiveDefinitionDto(String wholeExpression) {
+    private static TypeRecursiveDefinitionDto getTypeRecursiveDefinitionDto(String input) {
+        String wholeExpression = input;
         int dotPosition = wholeExpression.indexOf('.');
+        if (dotPosition != -1 && wholeExpression.substring(0, dotPosition).equals("this")) {
+            wholeExpression = input.substring(dotPosition + 1);
+            dotPosition = wholeExpression.indexOf('.');
+        }
         int bracketPosition = wholeExpression.indexOf('(');
         // if no "." and "(" inside expression => the last iteration
         if (dotPosition * bracketPosition == 1) {
@@ -441,7 +477,14 @@ public class TypeChecker {
     }
 
     private String getMethodReturnTypeByDeclaration(Node methodDeclaration) {
-        return methodDeclaration.getChildNodes().get(2).getValue();
+        int index;
+        if (methodDeclaration.getType().equals(FormalGrammar.METHOD_DECLARATION)){
+            index = 2;
+        }
+        else {
+            index = 1;
+        }
+        return methodDeclaration.getChildNodes().get(index).getValue();
     }
 
 

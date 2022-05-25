@@ -260,18 +260,25 @@ public class TreeUtil {
             String name = node.getChildNodes().get(0).getValue();
             JavaType type = JavaType.UNDEFINED;
             String evaluation = "";
+            String typeName = "";
             Node expression = node.getChildNodes().get(1);
             if (expression.getChildNodes().size() == 1) {
-                type = getTypeFromString(expression.getChildNodes().get(0).getValue());
+                String potentialType = expression.getChildNodes().get(0).getValue();
+                type = getTypeFromString(potentialType);
+                if (TypeChecker.knownTypes.contains(potentialType)) {
+                    typeName = potentialType;
+                }
             } else {
                 evaluation = expressionTypeToString(expression);
             }
-            variableDeclarations.add(new VariableDeclaration(
-                    name,
-                    type,
-                    evaluation,
-                    node
-            ));
+            VariableDeclaration declaration = new VariableDeclaration(
+                name,
+                type,
+                evaluation,
+                node
+            );
+            declaration.setTypeName(typeName);
+            variableDeclarations.add(declaration);
         });
         return variableDeclarations;
     }
@@ -452,9 +459,6 @@ public class TreeUtil {
     public Node getMethodDeclarationNodeByMethodName(String name, Tree tree) {
         methodDeclarations = new ArrayList<>();
         searchMethods(tree.getRoot(), name);
-//        TreeUtil.inOrderSearch(tree, List.of(FormalGrammar.METHOD_DECLARATION)).stream()
-//            .filter(method -> method.getChildNodes().get(0).getValue().equals(name))
-//            .forEach(x -> methodDeclarations.add(x));
         if (methodDeclarations.size() > 1) {
             throw new CompilationException("Duplicated method declarations detected. Overloading is not supported.");
         } else if (methodDeclarations.size() == 0) {
@@ -465,8 +469,9 @@ public class TreeUtil {
     public List<Node> methodDeclarations;
 
     public void searchMethods(Node node, String name) {
-        if (node.getType().equals(FormalGrammar.METHOD_DECLARATION)) {
-            if (Objects.equals(node.getChildNodes().get(0).getValue(), name)) {
+        if (node.getType().equals(FormalGrammar.METHOD_DECLARATION) || node.getType().equals(FormalGrammar.FUNCTION_DECLARATION)) {
+            int index = node.getType().equals(FormalGrammar.METHOD_DECLARATION) ? 0 : 2;
+            if (Objects.equals(node.getChildNodes().get(index).getValue(), name)) {
                 methodDeclarations.add(node);
             }
             return;
@@ -476,6 +481,13 @@ public class TreeUtil {
         for (Node childNode : childNodes) {
             searchMethods(childNode, name);
         }
+    }
+
+    public FirstClassFunction getFirstClassFunctionFromNode(Node node) {
+        if (!node.getType().equals(FormalGrammar.FUNCTION_DECLARATION)) {
+            throw new CompilationException("Analysed node is not a first-class function declaration node");
+        }
+        return null;
     }
 
     public Node getVariableDeclarationByVariableName(String name, Node scope, Tree tree) {
@@ -512,6 +524,10 @@ public class TreeUtil {
     public Node findVariableDeclarationNodeInScopeByName(String name, Node scope) {
         variableDeclarations = new ArrayList<>();
         parameterDeclarations = new ArrayList<>();
+
+        if (Objects.isNull(scope)) {
+            throw new TypeCheckerException("No variable with name " + name);
+        }
 
         // if scope is a method - check parameters first
         if (scope.getType() == FormalGrammar.METHOD_DECLARATION || scope.getType() == FormalGrammar.CONSTRUCTOR_DECLARATION) {
@@ -551,7 +567,7 @@ public class TreeUtil {
 
     public void searchParameters(Node node, String name) {
         if (node.getType().equals(FormalGrammar.PARAMETER_DECLARATION)) {
-            if (Objects.equals(node.getChildNodes().get(0).getValue(), name)) {
+            if (node.getChildNodes().get(0).getValue().equals(name)) {
                 parameterDeclarations.add(node);
             }
             return;
