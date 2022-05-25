@@ -1,4 +1,5 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.example.transpiler.lexer.InvalidTokenException;
 import com.example.transpiler.lexer.Lexer;
 import com.example.transpiler.syntaxer.GrammarChecker;
