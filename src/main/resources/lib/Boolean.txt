@@ -1,31 +1,31 @@
 class Boolean is
  var bool: Boolean
- this(val:Boolean) is
-    bool :=val
+ this(boolVal:Boolean) is
+    bool :=boolVal
  end
 
  method toInteger() : Integer is
-    var result: Integer
-    if bool == 1 then result: = 1 else result := 0
+    var intResult: Integer
+    if bool == 1 then intResult: = 1 else intResult := 0
     end
-    return result
+    return intResult
  end
 
- method Or(p: Boolean) : Boolean is
-    var result: Integer
-    result := p.toInteger() + bool.toInteger()
-    return result.toBoolean()
+ method Or(f1: Boolean) : Boolean is
+    var orResult: Integer
+    orResult := f1.toInteger() + bool.toInteger()
+    return orResult.toBoolean()
  end
 
- method And(p: Boolean) : Boolean is
-    var result: Integer
-    result := p.toInteger() * bool.toInteger()
-    return result.toBoolean()
+ method And(f2: Boolean) : Boolean is
+    var andResult: Integer
+    andResult := f2.toInteger() * bool.toInteger()
+    return andResult.toBoolean()
  end
 
  method Not() : Boolean is
-    var result: Integer
-    if bool.toInteger() == 1 then result := 0 else result := 1 end
-    return result.toBoolean()
+    var resultNot: Integer
+    if bool.toInteger() == 1 then resultNot := 0 else resultNot := 1 end
+    return resultNot.toBoolean()
  end
 end

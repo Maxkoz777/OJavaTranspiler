@@ -1,58 +1,49 @@
 class Integer is
   var real: Real
-  this(val: Integer) is
-     real :=val
+  this(realVal: Real) is
+     real :=realVal
   end
 
- method Plus(p:Integer) : Integer is
-    return real+p
- end
- method Plus(p:Real) : Real is
-    return real+p
- end
- method Minus(p: Integer) : Integer is
-    return real-p
- end
- method Minus(p: Real) : Real is
-    return real-p
- end
- method Mult(p: Integer) : Integer is
-    return p*real
- end
- method Mult(p: Real) : Real is
-     return p*real
+ method RealPlus(r1:Real) : Real is
+    return real+r1
  end
 
+ method RealMinus(r2: Real) : Real is
+    return real-r2
+ end
 
+ method RealMult(r3: Real) : Real is
+     return r3*real
+ end
 
- method Less(p: Integer) : Boolean is
-    return real<p
+ method RealLess(r4: Integer) : Boolean is
+    return real<r4
  end
- method Less(p: Real) : Boolean is
-     return real<p
+ method RealLess(r5: Real) : Boolean is
+     return real<r5
  end
- method LessEqual(p: Integer) : Boolean is
-     return real<=p
+ method RealLessEqual(r6: Integer) : Boolean is
+     return real<=r6
  end
- method LessEqual(p: Real) : Boolean is
-     return real<=p
+ method RealLessEqual(r7: Real) : Boolean is
+     return real<=r7
  end
- method Greater(p: Integer) : Boolean is
-     return real>p
+ method RealGreater(r8: Integer) : Boolean is
+     return real>r8
  end
- method Greater(p: Real) : Boolean is
-     return real>p
+ method RealGreater(r9: Real) : Boolean is
+     return real>r9
  end
- method GreaterEqual(p: Integer) : Boolean is
-      return real>=p
+ method RealGreaterEqual(s1: Integer) : Boolean is
+      return real>=s1
  end
- method GreaterEqual(p: Real) : Boolean is
-      return real>=p
+ method RealGreaterEqual(s2: Real) : Boolean is
+      return real>=s2
  end
- method Equal(p: Integer) : Boolean is
-      return real==p
+ method RealEqual(s3: Integer) : Boolean is
+      return real==s3
  end
- method Equal(p: Real) : Boolean is
-      return p==real
+ method RealEqual(s4: Real) : Boolean is
+      return s4==real
  end
 end
