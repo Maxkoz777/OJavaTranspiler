@@ -1,0 +1,10 @@
+class List[T] extends AnyRef is
+ // Constructors
+ this()
+ this(p: T)
+ this(p: T, count: Integer)
+ // Operators on lists
+ method append(v: T) : List
+ method head() : T
+ method tail() : List
+end 

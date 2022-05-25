@@ -1,0 +1,1 @@
+ method Or(p: Booleans) : Boolean

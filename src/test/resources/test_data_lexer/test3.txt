@@ -1,0 +1,5 @@
+var i is 1
+var j is 1
+while i<10 loop
+    while j<123 loop
+        x:= i * j
