@@ -10,23 +10,21 @@ class MathUtils is
   method empty(btw : Integer, arw : Integer) : Integer is
   end
 
-  method intMathMaxInt(mathA: Integer) : Integer is
-   var m : Integer.intMathMin
-   var mathI : Integer.get(1)
-   while mathI > m loop
-   if mathA > m then m := mathA.get(mathI) + mathI end
-   mathI := mathI + 1
-   m := 3
-   end
-   return intMathMax + mathI
+  method isPrime(num1: Integer): Integer is
+    var iteratorPrime : Integer
+    iteratorPrime := 2
+    while iteratorPrime.LessEqual(num1) loop
+        if num1.div(iteratorPrime)==0 then return 0 end
+        iteratorPrime := iteratorPrime + 1
+    end
   end
 
-  class Child is
-  end
+     method sqr(num2: Integer, exp: Integer): Integer is
+      var sqrRes : Integer
+      while exp.LessEqual(1) loop
+          sqrRes := sqrRes * num2
+      end
+      return sqrRes
+      end
 
-  method isPrime() : Boolean is
-    var mathJ : Integer
-    mathJ := 2
-    return mathJ - 1
-  end
 end
