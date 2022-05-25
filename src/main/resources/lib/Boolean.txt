@@ -1,20 +1,31 @@
 class Boolean is
-
- this(d:Boolean) is
+ var bool: Boolean
+ this(val:Boolean) is
+    bool :=val
  end
 
  method toInteger() : Integer is
+    var result: Integer
+    if bool == 1 then result: = 1 else result := 0
+    end
+    return result
  end
 
  method Or(p: Boolean) : Boolean is
+    var result: Integer
+    result := p.toInteger() + bool.toInteger()
+    return result.toBoolean()
  end
 
  method And(p: Boolean) : Boolean is
- end
-
- method Xor(p: Boolean) : Boolean is
+    var result: Integer
+    result := p.toInteger() * bool.toInteger()
+    return result.toBoolean()
  end
 
  method Not() : Boolean is
+    var result: Integer
+    if bool.toInteger() == 1 then result := 0 else result := 1 end
+    return result.toBoolean()
  end
 end
