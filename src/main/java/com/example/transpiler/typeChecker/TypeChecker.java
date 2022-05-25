@@ -237,7 +237,11 @@ public class TypeChecker {
             tree
         );
 
-        if (!firstType.equals(secondType)) {
+        if (
+            !firstType.equals(secondType)
+            && !Set.of(firstType.toUpperCase(Locale.ROOT), secondType.toUpperCase(Locale.ROOT))
+                .equals(Set.of("INTEGER", "REAL"))
+        ) {
             throw new TypeCheckerException("Trying to apply " + operation + " to types: " + firstType + " & " + secondType);
         }
 
