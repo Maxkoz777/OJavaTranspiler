@@ -1,22 +1,22 @@
 class MathUtils is
-  var Min : Integer
-  var Max : Integer
-  var z : Integer.d(s)
+  var min : Integer
+  var max : Integer
 
   this(bt : Integer, ar : Integer) is
-      Max := bt
-      Min := ar
+      max := bt
+      min := ar
   end
 
-  method empty(bt : Integer, ar : Integer) : Integer is
+  method empty(btw : Integer, arw : Integer) : Integer is
   end
 
-  method MaxInt(a: Array[Integer]) : Integer is
-   var max : Integer.Min
+  method MaxInt(a: Integer) : Integer is
+   var m : Integer.Min
    var i : Integer.get(1)
-   while i > max loop
-   if a > max then max := a.get(i) / i end
-   i := i.Plus(1)
+   while i > m loop
+   if a > m then m := a.get(i) + i end
+   i := i + 1
+   m := 3
    end
    return max + i
   end
@@ -27,5 +27,6 @@ class MathUtils is
   method isPrime(k: Integer) : Boolean is
     var j : Integer
     j := 2
+    return j - 1
   end
 end

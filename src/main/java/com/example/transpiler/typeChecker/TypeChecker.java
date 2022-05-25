@@ -12,14 +12,17 @@ import com.example.transpiler.syntaxer.Tree;
 import com.example.transpiler.syntaxer.TreeUtil;
 import com.example.transpiler.util.Pair;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -91,14 +94,14 @@ public class TypeChecker {
             .toList();
         checkProblemVariables(problemVariables, unit.getAssignments());
         if (isTreeArrayReady) {
-//            majorCheck();
+            majorCheck();
         }
     }
 
     private void majorCheck() {
         variablesToCheck.forEach(debtVariable -> {
             Set<String> types = debtVariable.getExpressionsWithTypes().stream()
-                .map(x -> TypeChecker.typeForExpressionWithTypes(x, debtVariable))
+                .map(x -> TypeChecker.typeForExpressionWithTypes(x, debtVariable).toUpperCase(Locale.ROOT))
                 .collect(Collectors.toSet());
             if (types.size() > 1) {
                 throw new TypeCheckerException(
@@ -116,9 +119,26 @@ public class TypeChecker {
 
     private String typeForExpressionWithTypes(VariableExpression variableExpression, DebtVariable debtVariable) {
 
+        if (isOperationIncluded(variableExpression)) {
+            return typeForExpressionWithOperation(variableExpression, debtVariable);
+        }
+
+        if (variableExpression.getWholeExpression().matches("^(?=.)([+-]?([0-9]*)(\\.([0-9]+))?)$")) {
+            return typeForDigits(variableExpression.getWholeExpression());
+        }
+
+        if (isAnotherTreeSearch(variableExpression.getTerm())) {
+            return typeFromSearchInAnotherTree(variableExpression);
+        }
+
         Node termDeclaration = TreeUtil.findVariableDeclarationNodeInScopeByName(
             variableExpression.getTerm(),
-            debtVariable.getScope()
+            TreeUtil.getNodeScope(
+                debtVariable.getTree(),
+                variableExpression.isAssignment()
+                    ? variableExpression.getAssignmentNode()
+                    : debtVariable.getDeclarationNode()
+            )
         );
 
         if (Objects.isNull(termDeclaration)) {
@@ -145,42 +165,204 @@ public class TypeChecker {
         );
     }
 
+    private static String typeFromSearchInAnotherTree(VariableExpression variableExpression) {
+        TypeRecursiveDefinitionDto typeRecursiveDefinitionDto = getTypeRecursiveDefinitionDto(
+            variableExpression.getWholeExpression()
+        );
+        Tree tree = typeRecursiveDefinitionDto.getTree();
+        String term = typeRecursiveDefinitionDto.getTerm();
+        Node termDeclaration = typeRecursiveDefinitionDto.getType().equals(ExpressionResult.METHOD)
+            ? TreeUtil.getMethodDeclarationNodeByMethodName(term, tree)
+            : TreeUtil.getVariableDeclarationByVariableName(
+                term,
+                TreeUtil.getMainClassNode(tree),
+                tree
+            );
+        return getTypeRecursively(
+            term,
+            termDeclaration,
+            typeRecursiveDefinitionDto.getExpression(),
+            tree
+        );
+    }
+
+    private boolean isAnotherTreeSearch(String term) {
+        return knownTypes.contains(term);
+    }
+
+    private String typeForDigits(String expression) {
+        return expression.contains(".") ? "Real" : "Integer";
+    }
+
+    private String typeForExpressionWithOperation(VariableExpression variableExpression,
+                                                  DebtVariable debtVariable) {
+        Tree tree = debtVariable.getTree();
+        List<String> boolOperations = List.of("==", ">=", ">", "<=", "<");
+        List<String> valueOperations = List.of("+", "-", "/", "*");
+        List<String> operations = Stream.of(boolOperations, valueOperations)
+            .flatMap(Collection::stream)
+            .toList();
+        String operation = operations.stream()
+            .filter(op -> variableExpression.getWholeExpression().contains(op))
+            .findFirst()
+            .orElseThrow(
+                () -> new TypeCheckerException("No valid operation provided for expression " + variableExpression.getWholeExpression())
+            );
+        String[] expressions = variableExpression.getWholeExpression().split(" ");
+
+        TypeRecursiveDefinitionDto first = getTypeRecursiveDefinitionDto(expressions[0]);
+        TypeRecursiveDefinitionDto second = getTypeRecursiveDefinitionDto(expressions[2]);
+
+        String firstType = getTypeRecursively(
+            first.getTerm(),
+            first.getType().equals(ExpressionResult.METHOD) ?
+                TreeUtil.getMethodDeclarationNodeByMethodName(first.getTerm(), tree) :
+                TreeUtil.getVariableDeclarationByVariableName(first.getTerm(),
+                                                              TreeUtil.getNodeScope(tree, variableExpression.getAssignmentNode()),
+                                                              tree
+                ),
+            expressions[0],
+            tree
+        );
+
+        String secondType = getTypeRecursively(
+            second.getTerm(),
+            second.getType().equals(ExpressionResult.METHOD) ?
+                TreeUtil.getMethodDeclarationNodeByMethodName(second.getTerm(), tree) :
+                TreeUtil.getVariableDeclarationByVariableName(second.getTerm(),
+                                                              TreeUtil.getNodeScope(tree, variableExpression.getAssignmentNode()),
+                                                              tree
+                ),
+            expressions[2],
+            tree
+        );
+
+        if (!firstType.equals(secondType)) {
+            throw new TypeCheckerException("Trying to apply " + operation + " to types: " + firstType + " & " + secondType);
+        }
+
+        if (boolOperations.contains(operation)) {
+            return "Boolean";
+        } else {
+            if (List.of("Real", "Char", "Integer", "String").contains(firstType)) {
+                return firstType;
+            } else {
+                throw new TypeCheckerException("Trying to apply " + operation + " to entities of non-lib type: " + firstType);
+            }
+        }
+
+    }
+
+    private boolean isOperationIncluded(VariableExpression variableExpression) {
+        List<String> operations = List.of("+", "-", "/", "==", ">=", ">", "<=", "<");
+        return operations.stream().anyMatch(op -> variableExpression.getWholeExpression().contains(op));
+    }
+
     private String getTypeRecursively(String term, Node termDeclaration, String wholeExpression, Tree tree) {
+
+        if (
+            term.matches("^(?=.)([+-]?([0-9]*)(\\.([0-9]+))?)$") ||
+                wholeExpression.matches("^(?=.)([+-]?([0-9]*)(\\.([0-9]+))?)$")) {
+
+            return typeForDigits(wholeExpression);
+        }
 
         String type = null;
 
-        if (wholeExpression.isEmpty()) {
-            return tree.getClassName();
-        }
-
         switch (termDeclaration.getType()) {
-            case METHOD_DECLARATION -> type = getMethodReturnTypeByDeclaration(termDeclaration);
+            case METHOD_DECLARATION -> {
+                String returnType = getMethodReturnTypeByDeclaration(termDeclaration);
+                if (wholeExpression.isEmpty()) {
+                    type = returnType;
+                }
+                else {
+                    TypeRecursiveDefinitionDto recursiveTypeDto = getTypeRecursiveDefinitionDto(wholeExpression);
+                    Tree newTree = trees.stream()
+                        .filter(tree1 -> tree1.getClassName().equals(returnType))
+                        .findFirst()
+                        .orElseThrow(() -> new TypeCheckerException("No tree for class name: " + returnType));
+                    String newTerm = recursiveTypeDto.getTerm();
+
+                    type = getTypeRecursively(
+                        newTerm,
+                        recursiveTypeDto.getType().equals(ExpressionResult.METHOD) ?
+                            TreeUtil.getMethodDeclarationNodeByMethodName(newTerm, newTree) :
+                            TreeUtil.getVariableDeclarationByVariableName(newTerm,
+                                                                          TreeUtil.getNodeScope(newTree,
+                                                                                                TreeUtil.getMainClassNode(
+                                                                                                    newTree)),
+                                                                          newTree
+                            ),
+                        recursiveTypeDto.getExpression(),
+                        newTree
+                    );
+                }
+            }
             case PARAMETER_DECLARATION -> type = getParameterTypeByDeclaration(termDeclaration);
             case VARIABLE_DECLARATION -> {
-                TypeRecursiveDefinitionDto recursiveTypeDto = getTypeRecursiveDefinitionDto(wholeExpression);
-
-                if (recursiveTypeDto.getType().equals(ExpressionResult.METHOD)) {
-                    return getTypeRecursively(
-                        recursiveTypeDto.getTerm(),
-                        TreeUtil.getMethodDeclarationNodeByMethodName(recursiveTypeDto.getTerm(), tree),
-                        recursiveTypeDto.getExpression(),
-                        tree
-                    );
-                } else {
-                    Node declaration = TreeUtil.getDeclarationNodeForLocalName(
-                        recursiveTypeDto.getTerm(),
-                        termDeclaration,
-                        recursiveTypeDto.getTree()
-                    );
-                    if (declaration.getType().equals(FormalGrammar.PARAMETER_DECLARATION)) {
-                        return getParameterTypeByDeclaration(declaration);
+                if (wholeExpression.isEmpty()) {
+                    VariableDeclaration declaration = TreeUtil.getVariableDeclarationsFromNodes(List.of(termDeclaration)).get(0);
+                    TypeRecursiveDefinitionDto recursiveDefinitionDto = getTypeRecursiveDefinitionDto(declaration.getExpression());
+                    String newTerm = recursiveDefinitionDto.getTerm();
+                    if (Objects.nonNull(recursiveDefinitionDto.getTree()) && recursiveDefinitionDto.getTerm().isEmpty()) {
+                        if (knownTypes.contains(newTerm)) {
+                            return newTerm;
+                        }
+                        else {
+                            throw new TypeCheckerException("Unable to determine type from variable declaration");
+                        }
+                    }
+                    if (Objects.isNull(recursiveDefinitionDto.getTree())) {
+                        recursiveDefinitionDto.setTree(tree);
+                    }
+                    if (!newTerm.isEmpty()) {
+                        Node newTermDeclaration = recursiveDefinitionDto.getType().equals(ExpressionResult.METHOD)
+                            ? TreeUtil.getMethodDeclarationNodeByMethodName(newTerm, recursiveDefinitionDto.getTree())
+                            : TreeUtil.getVariableDeclarationByVariableName(newTerm,
+                                                                            TreeUtil.getMainClassNode(recursiveDefinitionDto.getTree()),
+                                                                            recursiveDefinitionDto.getTree());
+                        return getTypeRecursively(
+                            newTerm,
+                            newTermDeclaration,
+                            recursiveDefinitionDto.getExpression(),
+                            recursiveDefinitionDto.getTree()
+                        );
                     } else {
+                        if (!declaration.getType().equals(JavaType.UNDEFINED)) {
+                            return declaration.getType().name();
+                        } else {
+                            throw new TypeCheckerException("No type defined for variable " + term + " in class " + tree.getClassName());
+                        }
+                    }
+                }
+                else {
+                    TypeRecursiveDefinitionDto recursiveTypeDto = getTypeRecursiveDefinitionDto(wholeExpression);
+                    if (recursiveTypeDto.getTree() == null) {
+                        recursiveTypeDto.setTree(tree);
+                    }
+                    if (recursiveTypeDto.getType().equals(ExpressionResult.METHOD)) {
                         return getTypeRecursively(
                             recursiveTypeDto.getTerm(),
-                            declaration,
+                            TreeUtil.getMethodDeclarationNodeByMethodName(recursiveTypeDto.getTerm(), tree),
                             recursiveTypeDto.getExpression(),
+                            tree
+                        );
+                    } else {
+                        Node declaration = TreeUtil.getDeclarationNodeForLocalName(
+                            recursiveTypeDto.getTerm(),
+                            termDeclaration,
                             recursiveTypeDto.getTree()
                         );
+                        if (declaration.getType().equals(FormalGrammar.PARAMETER_DECLARATION)) {
+                            return getParameterTypeByDeclaration(declaration);
+                        } else {
+                            return getTypeRecursively(
+                                recursiveTypeDto.getTerm(),
+                                declaration,
+                                recursiveTypeDto.getExpression(),
+                                recursiveTypeDto.getTree()
+                            );
+                        }
                     }
                 }
 
@@ -206,6 +388,7 @@ public class TypeChecker {
             String newTerm = wholeExpression.substring(0, dotPosition);
             String expression = wholeExpression.substring(dotPosition + 1);
             Tree tree = null;
+            ExpressionResult expressionResult = ExpressionResult.VARIABLE;
             if (knownTypes.contains(newTerm)) {
                 String finalNewTerm = newTerm;
                 tree = trees.stream()
@@ -215,13 +398,23 @@ public class TypeChecker {
                         () -> new TypeCheckerException("No tree with name " + finalNewTerm + " exist in trees")
                     );
                 int updatedDotPosition = expression.indexOf('.');
-                newTerm = expression.substring(0, updatedDotPosition);
-                expression = expression.substring(updatedDotPosition + 1);
+                int updateBracketPosition = expression.indexOf('(');
+                if (updatedDotPosition * updateBracketPosition == 1) {
+                    newTerm = expression;
+                    expression = "";
+                } else if (updateBracketPosition == -1 || updatedDotPosition > -1 && updatedDotPosition < updateBracketPosition) {
+                    newTerm = expression.substring(0, updatedDotPosition);
+                    expression = expression.substring(updatedDotPosition + 1);
+                } else {
+                    newTerm = expression.substring(0, updateBracketPosition);
+                    expression = expression.substring(expression.indexOf(')') + 1);
+                    expressionResult = ExpressionResult.METHOD;
+                }
             }
             return new TypeRecursiveDefinitionDto(
                 newTerm,
                 expression,
-                ExpressionResult.VARIABLE,
+                expressionResult,
                 tree
             );
         }
@@ -325,8 +518,9 @@ public class TypeChecker {
         Node node = expressionWithNode.getKey();
         String[] elements = expression.split("\\.");
         String lastTerm = elements[elements.length - 1];
-        ExpressionResult result = !lastTerm.contains("(") ? ExpressionResult.VARIABLE : ExpressionResult.METHOD;
-        String name = result.equals(ExpressionResult.METHOD) ? lastTerm.substring(0, lastTerm.indexOf("(")) : lastTerm;
+        String firstTerm = elements[0];
+        ExpressionResult result = !firstTerm.contains("(") ? ExpressionResult.VARIABLE : ExpressionResult.METHOD;
+        String name = result.equals(ExpressionResult.METHOD) ? firstTerm.substring(0, firstTerm.indexOf("(")) : firstTerm;
         boolean isAssignment = !Objects.isNull(node);
         return new VariableExpression(name, result, expression, node, isAssignment);
     }

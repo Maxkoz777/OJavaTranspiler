@@ -452,6 +452,9 @@ public class TreeUtil {
     public Node getMethodDeclarationNodeByMethodName(String name, Tree tree) {
         methodDeclarations = new ArrayList<>();
         searchMethods(tree.getRoot(), name);
+//        TreeUtil.inOrderSearch(tree, List.of(FormalGrammar.METHOD_DECLARATION)).stream()
+//            .filter(method -> method.getChildNodes().get(0).getValue().equals(name))
+//            .forEach(x -> methodDeclarations.add(x));
         if (methodDeclarations.size() > 1) {
             throw new CompilationException("Duplicated method declarations detected. Overloading is not supported.");
         } else if (methodDeclarations.size() == 0) {
@@ -485,7 +488,7 @@ public class TreeUtil {
                 currentScope = getNodeScope(tree, currentScope);
                 break;
             }
-        } while (currentScope.getType().equals(FormalGrammar.CLASS_DECLARATION));
+        } while (!currentScope.getType().equals(FormalGrammar.CLASS_DECLARATION) && result == null);
 
         variableDeclarations = new ArrayList<>();
         parameterDeclarations = new ArrayList<>();
@@ -511,7 +514,7 @@ public class TreeUtil {
         parameterDeclarations = new ArrayList<>();
 
         // if scope is a method - check parameters first
-        if (scope.getType() == FormalGrammar.METHOD_DECLARATION) {
+        if (scope.getType() == FormalGrammar.METHOD_DECLARATION || scope.getType() == FormalGrammar.CONSTRUCTOR_DECLARATION) {
             searchParameters(scope, name);
             if (parameterDeclarations.size() == 0){
                 searchVariables(scope, name);
@@ -564,7 +567,7 @@ public class TreeUtil {
     public Node getDeclarationNodeForLocalName(String term, Node expressionDeclaration, Tree tree) {
         // todo term - variable name inside some expression from "expression declaration"
         // todo find a declaration(VARIABLE_DECLARATION or PARAMETER_DECLARATION) for term
-        return null;
+        return expressionDeclaration;
     }
 
     public FirstClassFunction getFunctionFromDeclarationNode(Node node) {
