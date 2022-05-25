@@ -102,7 +102,7 @@ public class MethodGenerator {
 
     private Statement variableDeclarationStatement(Node node) {
         VariableDeclaration variableDeclaration = TreeUtil.variableDeclarationFromNode(node);
-        Type type = new ClassOrInterfaceType(TreeUtil.getInferredTypeForNodeInClass(node, className));
+        Type type = new ClassOrInterfaceType("var");
         boolean hasExpression = !variableDeclaration.getExpression().isEmpty();
         Expression expression = hasExpression ? expressionFromString(variableDeclaration.getExpression()) : null;
         VariableDeclarator declarator;

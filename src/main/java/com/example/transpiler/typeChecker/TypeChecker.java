@@ -1,7 +1,6 @@
 package com.example.transpiler.typeChecker;
 
 import com.example.transpiler.codeGenerator.model.Assignment;
-import com.example.transpiler.codeGenerator.model.ClassDeclaration;
 import com.example.transpiler.codeGenerator.model.JavaType;
 import com.example.transpiler.codeGenerator.model.Variable;
 import com.example.transpiler.codeGenerator.model.VariableDeclaration;
@@ -27,12 +26,14 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TypeChecker {
 
+    //
     public int treesCount = 0;
     public List<Tree> trees = new ArrayList<>();
     public boolean isTreeArrayReady = false;
-    private List<DebtVariable> variablesToCheck = new ArrayList<>();
+    private final List<DebtVariable> variablesToCheck = new ArrayList<>();
     public List<String> knownTypes = new ArrayList<>();
     private Tree currentTree;
+    private final String NUMBER = "^(?=.)([+-]?([0-9]*)(\\.([0-9]+))?)$";
 
     public void check(Tree tree) {
         currentTree = tree;
@@ -94,7 +95,8 @@ public class TypeChecker {
                 );
             }
             if (types.isEmpty()) {
-                VariableDeclaration declaration = TreeUtil.variableDeclarationFromNode(debtVariable.getDeclarationNode());
+                VariableDeclaration declaration = TreeUtil.variableDeclarationFromNode(
+                    debtVariable.getDeclarationNode());
                 if (!knownTypes.contains(declaration.getTypeName())) {
                     throw new TypeCheckerException(
                         String.format("No defined type for variable %s found", debtVariable.getName())
@@ -111,7 +113,7 @@ public class TypeChecker {
             return typeForExpressionWithOperation(variableExpression, debtVariable);
         }
 
-        if (variableExpression.getWholeExpression().matches("^(?=.)([+-]?([0-9]*)(\\.([0-9]+))?)$")) {
+        if (variableExpression.getWholeExpression().matches(NUMBER)) {
             return typeForDigits(variableExpression.getWholeExpression());
         }
 
@@ -286,13 +288,13 @@ public class TypeChecker {
     private String getTypeRecursively(String term, Node termDeclaration, String wholeExpression, Tree tree) {
 
         if (
-            term.matches("^(?=.)([+-]?([0-9]*)(\\.([0-9]+))?)$") ||
-                wholeExpression.matches("^(?=.)([+-]?([0-9]*)(\\.([0-9]+))?)$")) {
+            term.matches(NUMBER) ||
+                wholeExpression.matches(NUMBER)) {
 
             return typeForDigits(wholeExpression);
         }
 
-        String type = null;
+        String type;
 
         if (Objects.isNull(termDeclaration)) {
             throw new TypeCheckerException("No definition for variable " + term);
@@ -411,22 +413,18 @@ public class TypeChecker {
                     if (recursiveTypeDto.getType().equals(ExpressionResult.METHOD)) {
                         return getTypeRecursively(
                             recursiveTypeDto.getTerm(),
-                            TreeUtil.getMethodDeclarationNodeByMethodName(recursiveTypeDto.getTerm(), treeForFutureSearch),
+                            TreeUtil.getMethodDeclarationNodeByMethodName(recursiveTypeDto.getTerm(),
+                                                                          treeForFutureSearch),
                             recursiveTypeDto.getExpression(),
                             treeForFutureSearch
                         );
                     } else {
-                        Node declaration = TreeUtil.getDeclarationNodeForLocalName(
-                            recursiveTypeDto.getTerm(),
-                            termDeclaration,
-                            recursiveTypeDto.getTree()
-                        );
-                        if (declaration.getType().equals(FormalGrammar.PARAMETER_DECLARATION)) {
-                            return getParameterTypeByDeclaration(declaration);
+                        if (termDeclaration.getType().equals(FormalGrammar.PARAMETER_DECLARATION)) {
+                            return getParameterTypeByDeclaration(termDeclaration);
                         } else {
                             return getTypeRecursively(
                                 recursiveTypeDto.getTerm(),
-                                declaration,
+                                termDeclaration,
                                 recursiveTypeDto.getExpression(),
                                 recursiveTypeDto.getTree()
                             );
@@ -435,6 +433,7 @@ public class TypeChecker {
                 }
 
             }
+            default -> throw new TypeCheckerException("Unsupported term type");
         }
 
         return type;
@@ -555,7 +554,6 @@ public class TypeChecker {
         String expression = expressionWithNode.getValue();
         Node node = expressionWithNode.getKey();
         String[] elements = expression.split("\\.");
-        String lastTerm = elements[elements.length - 1];
         String firstTerm = elements[0];
         ExpressionResult result = !firstTerm.contains("(") ? ExpressionResult.VARIABLE : ExpressionResult.METHOD;
         String name =
@@ -576,7 +574,6 @@ public class TypeChecker {
     private Long numberOfAssignmentsForVariable(Variable variable, List<Assignment> assignments) {
         return assignments.stream()
             .filter(assignment -> assignment.getVarName().equals(variable.getName()))
-            .filter(assignment -> TreeUtil.inScope(assignment.getNode(), variable.getScope()))
             .count();
     }
 

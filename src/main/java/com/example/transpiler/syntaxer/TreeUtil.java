@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import lombok.experimental.UtilityClass;
@@ -19,21 +18,23 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TreeUtil {
 
-    public final Predicate<Node> isVariableDeclaration = node -> node.getType().equals(FormalGrammar.VARIABLE_DECLARATION);
+    public final Predicate<Node> isVariableDeclaration = node -> node.getType()
+        .equals(FormalGrammar.VARIABLE_DECLARATION);
     public final Predicate<Node> isIdentifier = node -> node.getType().equals(FormalGrammar.IDENTIFIER);
     public final Predicate<Node> isExpression = node -> node.getType().equals(FormalGrammar.EXPRESSION);
     public final Predicate<Node> isMember = node -> node.getType().equals(FormalGrammar.MEMBER_DECLARATION);
     public final Predicate<Node> isConstructor = node -> node.getType().equals(FormalGrammar.CONSTRUCTOR_DECLARATION);
     public final Predicate<Node> isBody = node -> node.getType().equals(FormalGrammar.BODY);
 
-    public final Predicate<Node> isParameterDeclaration = node -> node.getType().equals(FormalGrammar.PARAMETER_DECLARATION);
+    public final Predicate<Node> isParameterDeclaration = node -> node.getType()
+        .equals(FormalGrammar.PARAMETER_DECLARATION);
     public final Predicate<Node> isClassDeclaration = node -> node.getType().equals(FormalGrammar.CLASS_DECLARATION);
     public final Predicate<Node> isParameters = node -> node.getType().equals(FormalGrammar.PARAMETERS);
     public final Predicate<Node> isClassName = node -> node.getType().equals(FormalGrammar.CLASS_NAME);
     public final Predicate<Node> isStatement = node -> node.getType().equals(FormalGrammar.STATEMENT);
     public final Predicate<Node> isAssignment = node -> node.getType().equals(FormalGrammar.ASSIGNMENT);
-    public final Predicate<Node> isMethodDeclaration = node -> node.getType().equals(FormalGrammar.METHOD_DECLARATION);
-    public final Predicate<Node> isFunctionDeclaration = node -> node.getType().equals(FormalGrammar.FUNCTION_DECLARATION);
+    public final Predicate<Node> isFunctionDeclaration = node -> node.getType()
+        .equals(FormalGrammar.FUNCTION_DECLARATION);
     public final Function<Node, Stream<Node>> convertToChildNodes = nodes -> nodes.getChildNodes().stream();
 
     /**
@@ -43,11 +44,11 @@ public class TreeUtil {
     public Pair<String, String> getClassSignature(Node classNode) {
         List<String> names = new ArrayList<>(2);
         names.addAll(classNode.getChildNodes()
-                .stream()
-                .filter(node -> node.getType().equals(FormalGrammar.CLASS_NAME))
-                .flatMap(convertToChildNodes)
-                .map(Node::getValue)
-                .toList());
+                         .stream()
+                         .filter(node -> node.getType().equals(FormalGrammar.CLASS_NAME))
+                         .flatMap(convertToChildNodes)
+                         .map(Node::getValue)
+                         .toList());
         if (names.size() == 1) {
             names.add(null);
         }
@@ -68,10 +69,10 @@ public class TreeUtil {
      */
     public List<Variable> getClassVariables(Node node) {
         List<Node> variableNodes = node.getChildNodes().stream()
-                .filter(isMember)
-                .flatMap(convertToChildNodes)
-                .filter(isVariableDeclaration)
-                .toList();
+            .filter(isMember)
+            .flatMap(convertToChildNodes)
+            .filter(isVariableDeclaration)
+            .toList();
         return variablesFromNodes(variableNodes);
     }
 
@@ -82,16 +83,16 @@ public class TreeUtil {
     private List<Variable> variablesFromNodes(List<Node> variableNodes) {
         List<Variable> variables = new ArrayList<>();
         List<String> names = variableNodes.stream()
-                .flatMap(convertToChildNodes)
-                .filter(isIdentifier)
-                .map(Node::getValue)
-                .toList();
+            .flatMap(convertToChildNodes)
+            .filter(isIdentifier)
+            .map(Node::getValue)
+            .toList();
         List<String> types = variableNodes.stream()
-                .flatMap(convertToChildNodes)
-                .filter(isExpression)
-                .flatMap(convertToChildNodes)
-                .map(Node::getValue)
-                .toList();
+            .flatMap(convertToChildNodes)
+            .filter(isExpression)
+            .flatMap(convertToChildNodes)
+            .map(Node::getValue)
+            .toList();
         for (int i = 0; i < variableNodes.size(); i++) {
             variables.add(new Variable(names.get(i), types.get(i)));
         }
@@ -106,20 +107,20 @@ public class TreeUtil {
         String className = getClassNameForClassDeclarationNode(node);
         List<Constructor> constructors = new ArrayList<>();
         List<Node> constructorNodes = node.getChildNodes().stream()
-                .filter(isMember)
-                .flatMap(convertToChildNodes)
-                .filter(isConstructor)
-                .toList();
+            .filter(isMember)
+            .flatMap(convertToChildNodes)
+            .filter(isConstructor)
+            .toList();
         for (Node cons : constructorNodes) {
             // Collecting parameters
             List<Variable> parameters = getParameters(cons.getChildNodes().get(0));
             Node body = cons.getChildNodes().get(1);
             // Collecting Assignments declarations inside constructor
             List<Node> assignments = cons.getChildNodes().get(1).getChildNodes().stream()
-                    .filter(isStatement)
-                    .flatMap(convertToChildNodes)
-                    .filter(isAssignment)
-                    .toList();
+                .filter(isStatement)
+                .flatMap(convertToChildNodes)
+                .filter(isAssignment)
+                .toList();
             List<Assignment> declaredAssignments = assignmentsFromNodes(assignments);
             constructors.add(new Constructor(parameters, declaredAssignments, body, className));
         }
@@ -132,31 +133,31 @@ public class TreeUtil {
             throw new CompilationException("Analysed node is not a class declaration node");
         }
         return node.getChildNodes().stream()
-                .filter(isClassName)
-                .findFirst().orElseThrow(() -> new CompilationException("Wrong AST construction"))
-                .getChildNodes().get(0)
-                .getValue();
+            .filter(isClassName)
+            .findFirst().orElseThrow(() -> new CompilationException("Wrong AST construction"))
+            .getChildNodes().get(0)
+            .getValue();
     }
 
     public List<Assignment> assignmentsFromNodes(List<Node> assignments) {
         List<Assignment> declaredAssignments = new ArrayList<>();
         assignments.forEach(assignment ->
-        {
-            String varName = assignment.getChildNodes().get(0).getValue();
-            String expression;
-            if (assignment.getChildNodes().get(1).getType().equals(FormalGrammar.EXPRESSION)) {
-                expression = expressionTypeToString(assignment.getChildNodes().get(1));
-            } else {
-                List<Node> children = assignment.getChildNodes().get(1).getChildNodes();
-                expression = expressionTypeToString(children.get(0)) + " " +
-                    children.get(1).getValue() + " " + expressionTypeToString(children.get(2));
-            }
-            declaredAssignments.add(new Assignment(
-                varName,
-                expression,
-                assignment
-            ));
-        });
+                            {
+                                String varName = assignment.getChildNodes().get(0).getValue();
+                                String expression;
+                                if (assignment.getChildNodes().get(1).getType().equals(FormalGrammar.EXPRESSION)) {
+                                    expression = expressionTypeToString(assignment.getChildNodes().get(1));
+                                } else {
+                                    List<Node> children = assignment.getChildNodes().get(1).getChildNodes();
+                                    expression = expressionTypeToString(children.get(0)) + " " +
+                                        children.get(1).getValue() + " " + expressionTypeToString(children.get(2));
+                                }
+                                declaredAssignments.add(new Assignment(
+                                    varName,
+                                    expression,
+                                    assignment
+                                ));
+                            });
         return declaredAssignments;
     }
 
@@ -188,8 +189,8 @@ public class TreeUtil {
                 }
                 case ARGUMENTS -> {
                     List<String> args = child.getChildNodes().stream()
-                            .map(ex -> ex.getChildNodes().get(0).getValue())
-                            .toList();
+                        .map(ex -> ex.getChildNodes().get(0).getValue())
+                        .toList();
                     builder.append(String.join(", ", args));
                     builder.append(")");
                     if (i != childNodes.size() - 1) {
@@ -210,18 +211,18 @@ public class TreeUtil {
     public List<Variable> getParameters(Node cons) {
         List<Variable> parameters = new ArrayList<>();
         List<Node> parameterDeclarations = cons.getChildNodes().stream()
-                .filter(isParameterDeclaration)
-                .flatMap(convertToChildNodes)
-                .toList();
+            .filter(isParameterDeclaration)
+            .flatMap(convertToChildNodes)
+            .toList();
         List<String> parameterNames = parameterDeclarations.stream()
-                .filter(isIdentifier)
-                .map(Node::getValue)
-                .toList();
+            .filter(isIdentifier)
+            .map(Node::getValue)
+            .toList();
         List<String> parameterTypes = parameterDeclarations.stream()
-                .filter(isClassName)
-                .flatMap(convertToChildNodes)
-                .map(Node::getValue)
-                .toList();
+            .filter(isClassName)
+            .flatMap(convertToChildNodes)
+            .map(Node::getValue)
+            .toList();
         for (int i = 0; i < parameterNames.size(); i++) {
             parameters.add(new Variable(parameterNames.get(i), parameterTypes.get(i)));
         }
@@ -229,9 +230,6 @@ public class TreeUtil {
     }
 
     public List<Node> inOrderSearch(Tree tree, List<FormalGrammar> filters) {
-        List<Node> result = new ArrayList<>();
-        List<Node> nodes = tree.getRoot().getChildNodes();
-        result.addAll(nodes.stream().filter(node -> filters.contains(node.getType())).toList());
         filteredNodes = new ArrayList<>();
 
         findFilters(tree.getRoot(), filters);
@@ -239,7 +237,7 @@ public class TreeUtil {
         return filteredNodes;
     }
 
-    public List<Node> filteredNodes;
+    private List<Node> filteredNodes;
 
     public void findFilters(Node node, List<FormalGrammar> filters) {
         if (filters.contains(node.getType())) {
@@ -293,33 +291,20 @@ public class TreeUtil {
     }
 
     public CheckUnit getAllVariablesForProgram(Tree tree) {
-        List<Node> nodesForCheck = inOrderSearch(tree, List.of(FormalGrammar.ASSIGNMENT, FormalGrammar.VARIABLE_DECLARATION));
+        List<Node> nodesForCheck = inOrderSearch(tree,
+                                                 List.of(FormalGrammar.ASSIGNMENT, FormalGrammar.VARIABLE_DECLARATION));
         List<VariableDeclaration> declarations = getVariableDeclarationsFromNodes(nodesForCheck.stream()
-                .filter(isVariableDeclaration)
-                .toList());
+                                                                                      .filter(isVariableDeclaration)
+                                                                                      .toList());
         List<Assignment> assignments = assignmentsFromNodes(nodesForCheck.stream()
-                .filter(isAssignment)
-                .toList());
+                                                                .filter(isAssignment)
+                                                                .toList());
         return new CheckUnit(assignments, declarations);
     }
 
-//    public static ArrayList<Node> methods;
-//    public ArrayList<Node> getMethods(Node classNode) {
-//        System.out.println(classNode);
-//
-//        filteredNodes = new ArrayList<Node>();
-//        List<FormalGrammar> filters = new ArrayList<FormalGrammar>();
-//        filters.add(FormalGrammar.METHOD_DECLARATION);
-//        findFilters(classNode, filters);
-//
-//        return (ArrayList<Node>) filteredNodes;
-//
-//    }
+    private static List<Method> classMethods;
 
-
-    public static ArrayList<Method> classMethods;
-
-    public ArrayList<Method> getClassMethods(Node classNode) {
+    public List<Method> getClassMethods(Node classNode) {
         classMethods = new ArrayList<>();
         for (Node node : classNode.getChildNodes()) {
             if (node.getType() == FormalGrammar.MEMBER_DECLARATION) {
@@ -327,18 +312,18 @@ public class TreeUtil {
                     Node methodNode = node.getChildNodes().get(0);
                     String methodName = methodNode.getChildNodes().get(0).getValue();
                     List<Node> methodParamsNodeList = methodNode.getChildNodes()
-                            .stream()
-                            .filter(isParameters).toList();
+                        .stream()
+                        .filter(isParameters).toList();
                     Node paramNode = methodParamsNodeList.isEmpty() ? null : methodParamsNodeList.get(0);
 
                     List<Node> methodBodyNodeList = methodNode.getChildNodes()
-                            .stream()
-                            .filter(isBody).toList();
+                        .stream()
+                        .filter(isBody).toList();
                     Node bodyNode = methodBodyNodeList.isEmpty() ? null : methodBodyNodeList.get(0);
 
                     List<Node> methodIdentifierList = methodNode.getChildNodes()
-                            .stream()
-                            .filter(isIdentifier).skip(1).toList();
+                        .stream()
+                        .filter(isIdentifier).skip(1).toList();
                     String identifier = methodIdentifierList.isEmpty() ? null : methodIdentifierList.get(0).getValue();
 
                     List<Parameter> parameters = new ArrayList<>();
@@ -356,18 +341,18 @@ public class TreeUtil {
 
     public List<Parameter> parameterNodeToParameters(Node node) {
         return node.getChildNodes().stream()
-                .map(param -> {
-                    List<Node> children = param.getChildNodes();
-                    String name = children.get(0).getValue();
-                    String type = children.get(1).getChildNodes().get(0).getValue();
-                    return new Parameter(name, type);
-                })
-                .toList();
+            .map(param -> {
+                List<Node> children = param.getChildNodes();
+                String name = children.get(0).getValue();
+                String type = children.get(1).getChildNodes().get(0).getValue();
+                return new Parameter(name, type);
+            })
+            .toList();
     }
 
     /**
      * @param tree is a tree containing possible types
-     * @return list of all types met in our tree (e.g. main class name + class name fro )
+     * @return list of all types met in our tree (e.g. main class name + class name for all nested classes )
      */
     public List<String> getAllTypesForTree(Tree tree) {
         List<Node> classNodes = inOrderSearch(tree, List.of(FormalGrammar.CLASS_DECLARATION));
@@ -375,9 +360,14 @@ public class TreeUtil {
     }
 
 
+    /**
+     *
+     * @param tree
+     * @param node
+     * @return scope for node in tree
+     */
     public Node getNodeScope(Tree tree, Node node) {
-        Node res = findNodeScope(tree.getRoot(), node, null);
-        return res;
+        return findNodeScope(tree.getRoot(), node, null);
     }
 
     public Node findNodeScope(Node n, Node s, Node currentScope) {
@@ -385,9 +375,9 @@ public class TreeUtil {
             return currentScope;
         } else {
             List<FormalGrammar> declarations = List.of(
-                    FormalGrammar.METHOD_DECLARATION,
-                    FormalGrammar.CLASS_DECLARATION,
-                    FormalGrammar.CONSTRUCTOR_DECLARATION
+                FormalGrammar.METHOD_DECLARATION,
+                FormalGrammar.CLASS_DECLARATION,
+                FormalGrammar.CONSTRUCTOR_DECLARATION
             );
             if (declarations.contains(n.getType())) {
                 currentScope = n;
@@ -407,7 +397,7 @@ public class TreeUtil {
      * returns true if this IF_STATEMENT has else branch
      */
     public boolean isElseCondition(Node node) {
-        Integer bodyCount = 0;
+        int bodyCount = 0;
         for (Node childNode : node.getChildNodes()) {
             if (childNode.getType() == FormalGrammar.BODY) {
                 bodyCount = bodyCount + 1;
@@ -416,60 +406,76 @@ public class TreeUtil {
         return bodyCount == 2;
     }
 
+    /**
+     *
+     * @param node
+     * @return variable declaration from variable declaration node
+     */
     public static VariableDeclaration variableDeclarationFromNode(Node node) {
         List<VariableDeclaration> variableDeclarations = getVariableDeclarationsFromNodes(List.of(node));
         return variableDeclarations.get(0);
     }
 
+    /**
+     *
+     * @param classNode
+     * @return all nested classes for classnode
+     */
     public static List<Node> getNestedClasses(Node classNode) {
         return classNode.getChildNodes().stream()
-                .filter(isMember)
-                .flatMap(convertToChildNodes)
-                .filter(isClassDeclaration)
-                .toList();
+            .filter(isMember)
+            .flatMap(convertToChildNodes)
+            .filter(isClassDeclaration)
+            .toList();
     }
 
-
-    public boolean inScope(Node target, Node scope) {
-        // todo return true if target is inside scope
-        // todo it can be a child of a child of provided scope with any depth of such including
-        return true;
-    }
-
+    /**
+     *
+     * @param tree
+     * @return name for tree
+     */
     public String getNameForTree(Tree tree) {
         Node classNode = TreeUtil.getMainClassNode(tree);
         return TreeUtil.getClassSignature(classNode).getFirst();
     }
 
+    /**
+     *
+     * @param className
+     * @return tree for provided className
+     */
     public Tree getTreeForClassName(String className) {
         return TypeChecker.trees.stream()
-                .filter(tree -> tree.getClassName().equalsIgnoreCase(className))
-                .findFirst()
-                .orElseThrow(
-                        () -> new TypeCheckerException("No tree with class named: " + className)
-                );
+            .filter(tree -> tree.getClassName().equalsIgnoreCase(className))
+            .findFirst()
+            .orElseThrow(
+                () -> new TypeCheckerException("No tree with class named: " + className)
+            );
     }
 
-    public String getInferredTypeForNodeInClass(Node node, String className) {
-        //Tree tree = TreeUtil.getTreeForClassName(className);
-        // todo implement type inference (I'll do it myself later)
-        return "var";
-    }
-
+    /**
+     *
+     * @param name
+     * @param tree
+     * @return method declaration entity with given name from provided tree
+     */
     public Node getMethodDeclarationNodeByMethodName(String name, Tree tree) {
         methodDeclarations = new ArrayList<>();
         searchMethods(tree.getRoot(), name);
         if (methodDeclarations.size() > 1) {
             throw new CompilationException("Duplicated method declarations detected. Overloading is not supported.");
-        } else if (methodDeclarations.size() == 0) {
+        } else if (methodDeclarations.isEmpty()) {
             return null;
-        } else return methodDeclarations.get(0);
+        } else {
+            return methodDeclarations.get(0);
+        }
     }
 
     public List<Node> methodDeclarations;
 
     public void searchMethods(Node node, String name) {
-        if (node.getType().equals(FormalGrammar.METHOD_DECLARATION) || node.getType().equals(FormalGrammar.FUNCTION_DECLARATION)) {
+        if (node.getType().equals(FormalGrammar.METHOD_DECLARATION) || node.getType()
+            .equals(FormalGrammar.FUNCTION_DECLARATION)) {
             int index = node.getType().equals(FormalGrammar.METHOD_DECLARATION) ? 0 : 2;
             if (Objects.equals(node.getChildNodes().get(index).getValue(), name)) {
                 methodDeclarations.add(node);
@@ -483,6 +489,11 @@ public class TreeUtil {
         }
     }
 
+    /**
+     *
+     * @param node
+     * @return first-class function entity from node
+     */
     public FirstClassFunction getFirstClassFunctionFromNode(Node node) {
         if (!node.getType().equals(FormalGrammar.FUNCTION_DECLARATION)) {
             throw new CompilationException("Analysed node is not a first-class function declaration node");
@@ -490,8 +501,15 @@ public class TreeUtil {
         return null;
     }
 
+    /**
+     *
+     * @param name
+     * @param scope
+     * @param tree
+     * @return variable/parameter declaration for given name inside provided tree starting from inner scope
+     *          and then going to CLASS_DECLARATION node if not found earlier
+     */
     public Node getVariableDeclarationByVariableName(String name, Node scope, Tree tree) {
-        // итерация по скоупам
         Node result;
         Node currentScope = scope;
         do {
@@ -500,26 +518,26 @@ public class TreeUtil {
                 currentScope = getNodeScope(tree, currentScope);
                 break;
             }
-        } while (!currentScope.getType().equals(FormalGrammar.CLASS_DECLARATION) && result == null);
+        } while (result == null && !currentScope.getType().equals(FormalGrammar.CLASS_DECLARATION));
 
         variableDeclarations = new ArrayList<>();
         parameterDeclarations = new ArrayList<>();
 
         searchParameters(currentScope, name);
-        if (parameterDeclarations.size()>0){
+        if (!parameterDeclarations.isEmpty()) {
             return parameterDeclarations.get(0);
         }
 
         searchVariables(currentScope, name);
-        if (variableDeclarations.size()>0) {
+        if (!variableDeclarations.isEmpty()) {
             return variableDeclarations.get(0);
+        } else {
+            return null;
         }
-        else return null;
     }
 
     public List<Node> variableDeclarations;
     public List<Node> parameterDeclarations;
-
 
     public Node findVariableDeclarationNodeInScopeByName(String name, Node scope) {
         variableDeclarations = new ArrayList<>();
@@ -530,24 +548,30 @@ public class TreeUtil {
         }
 
         // if scope is a method - check parameters first
-        if (scope.getType() == FormalGrammar.METHOD_DECLARATION || scope.getType() == FormalGrammar.CONSTRUCTOR_DECLARATION) {
+        if (scope.getType() == FormalGrammar.METHOD_DECLARATION
+            || scope.getType() == FormalGrammar.CONSTRUCTOR_DECLARATION) {
             searchParameters(scope, name);
-            if (parameterDeclarations.size() == 0){
+            if (parameterDeclarations.isEmpty()) {
                 searchVariables(scope, name);
-                if (variableDeclarations.size()==0){
+                if (variableDeclarations.isEmpty()) {
                     return null;
+                } else {
+                    return variableDeclarations.get(0);
                 }
-                else return variableDeclarations.get(0);
+            } else {
+                return parameterDeclarations.get(0);
             }
-            else return parameterDeclarations.get(0);
         }
-        if (scope.getType() == FormalGrammar.CLASS_DECLARATION){
+        if (scope.getType() == FormalGrammar.CLASS_DECLARATION) {
             searchVariables(scope, name);
-            if (variableDeclarations.size() == 0) {
+            if (variableDeclarations.isEmpty()) {
                 return null;
-            } else return variableDeclarations.get(0);
+            } else {
+                return variableDeclarations.get(0);
+            }
+        } else {
+            return null;
         }
-        else return null;
     }
 
     //........................................................................//
@@ -577,13 +601,6 @@ public class TreeUtil {
         for (Node childNode : childNodes) {
             searchParameters(childNode, name);
         }
-    }
-    //........................................................................//
-
-    public Node getDeclarationNodeForLocalName(String term, Node expressionDeclaration, Tree tree) {
-        // todo term - variable name inside some expression from "expression declaration"
-        // todo find a declaration(VARIABLE_DECLARATION or PARAMETER_DECLARATION) for term
-        return expressionDeclaration;
     }
 
     public FirstClassFunction getFunctionFromDeclarationNode(Node node) {

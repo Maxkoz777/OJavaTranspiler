@@ -34,17 +34,22 @@ public class JavaCodeGenerator {
     private void generateJavaCodeForClass(File file, ClassType type) {
 
         try {
+            // getting program as String
             String stringWithSourceCode = getStringForFile(file);
+            // generating tokens
             List<Token> tokens = Lexer.getTokensFromCode(stringWithSourceCode);
             String className = tokens.stream()
                 .filter(token -> token.getType().equals(TokenType.IDENTIFIER))
                 .map(Token::getLexeme)
                 .findFirst().orElseThrow(() -> new CompilationException("No name for class"));
+            // creating AST-tree from tokens
             Tree tree = GrammarChecker.checkGrammar(tokens);
             ObjectMapper mapper = new ObjectMapper();
             File treeFile = new File(className +  "Tree.json");
             mapper.writeValue(treeFile, tree);
+            // execute type-checking algorithm
             TypeChecker.check(tree);
+            // generating java-classes from tree
             ClassGenerator.generateClass(tree, type);
         }
         catch (IOException e) {
