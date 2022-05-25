@@ -393,16 +393,24 @@ public class TypeChecker {
                         }
                     }
                 } else {
+                    Tree treeForFutureSearch = TreeUtil.getTreeForClassName(
+                        getTypeRecursively(
+                            term,
+                            termDeclaration,
+                            "",
+                            tree
+                        )
+                    );
                     TypeRecursiveDefinitionDto recursiveTypeDto = getTypeRecursiveDefinitionDto(wholeExpression);
                     if (recursiveTypeDto.getTree() == null) {
-                        recursiveTypeDto.setTree(tree);
+                        recursiveTypeDto.setTree(treeForFutureSearch);
                     }
                     if (recursiveTypeDto.getType().equals(ExpressionResult.METHOD)) {
                         return getTypeRecursively(
                             recursiveTypeDto.getTerm(),
-                            TreeUtil.getMethodDeclarationNodeByMethodName(recursiveTypeDto.getTerm(), tree),
+                            TreeUtil.getMethodDeclarationNodeByMethodName(recursiveTypeDto.getTerm(), treeForFutureSearch),
                             recursiveTypeDto.getExpression(),
-                            tree
+                            treeForFutureSearch
                         );
                     } else {
                         Node declaration = TreeUtil.getDeclarationNodeForLocalName(

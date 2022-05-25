@@ -59,17 +59,53 @@ class TypeCheckerTest {
         String program = getProgram(2);
         var tokens = Lexer.getTokensFromCode(program);
         Tree tree;
-        try {
+        String stringWithTokens = tokens.toString();
+        log.info("Array with tokens: {}", stringWithTokens);
+        tree = GrammarChecker.checkGrammar(tokens);
+        TypeChecker.knownTypes.add(tree.getClassName());
+        TypeChecker.check(tree);
 
-            String stringWithTokens = tokens.toString();
-            log.info("Array with tokens: {}", stringWithTokens);
-            tree = GrammarChecker.checkGrammar(tokens);
-            TypeChecker.knownTypes.add(tree.getClassName());
-            TypeChecker.check(tree);
+    }
 
-        } catch (Exception exception) {
-            log.error(exception.getMessage());
-        }
+    @Test
+    void typeCheckerTest2() throws IOException {
+
+        String program = getProgram(3);
+        var tokens = Lexer.getTokensFromCode(program);
+        Tree tree;
+        String stringWithTokens = tokens.toString();
+        log.info("Array with tokens: {}", stringWithTokens);
+        tree = GrammarChecker.checkGrammar(tokens);
+        TypeChecker.knownTypes.add(tree.getClassName());
+        TypeChecker.check(tree);
+
+    }
+
+    @Test
+    void typeCheckerTest3() throws IOException {
+
+        String program = getProgram(4);
+        var tokens = Lexer.getTokensFromCode(program);
+        Tree tree;
+        String stringWithTokens = tokens.toString();
+        log.info("Array with tokens: {}", stringWithTokens);
+        tree = GrammarChecker.checkGrammar(tokens);
+        TypeChecker.knownTypes.add(tree.getClassName());
+        TypeChecker.check(tree);
+
+    }
+
+    @Test
+    void typeCheckerTest4() throws IOException {
+
+        String program = getProgram(5);
+        var tokens = Lexer.getTokensFromCode(program);
+        Tree tree;
+        String stringWithTokens = tokens.toString();
+        log.info("Array with tokens: {}", stringWithTokens);
+        tree = GrammarChecker.checkGrammar(tokens);
+        TypeChecker.knownTypes.add(tree.getClassName());
+        TypeChecker.check(tree);
 
     }
 
