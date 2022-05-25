@@ -2,27 +2,10 @@ package com.example.transpiler;
 
 import com.example.transpiler.codeGenerator.JavaCodeGenerator;
 import com.example.transpiler.util.TranspilerUtil;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.AssignExpr;
-import com.github.javaparser.ast.expr.FieldAccessExpr;
-import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.ThisExpr;
-import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.ReturnStmt;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class TranspilerConstruction {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         // main program
         TranspilerUtil.retrieveSourceLanguageLibraryFiles()
@@ -30,58 +13,6 @@ public class TranspilerConstruction {
 
         TranspilerUtil.retrieveSourceLanguageFiles()
             .forEach(JavaCodeGenerator::generateJavaSourceFile);
-
-        // example parser
-//        example();
-
-    }
-
-    private static void example() throws IOException {
-
-        final String PATH = "src/main/java/com/example/transpiler/generated/";
-
-        CompilationUnit cu = new CompilationUnit();
-
-        cu.setPackageDeclaration("com.example.transpiler.generated");
-
-        ClassOrInterfaceDeclaration book = cu.addClass("Book");
-        book.addField("String", "title");
-        book.addField("Person", "author");
-
-        book.addConstructor(Modifier.Keyword.PUBLIC)
-            .addParameter("String", "title")
-            .addParameter("Person", "author")
-            .setBody(new BlockStmt()
-                         .addStatement(new ExpressionStmt(new AssignExpr(
-                             new FieldAccessExpr(new ThisExpr(), "title"),
-                             new NameExpr("title"),
-                             AssignExpr.Operator.ASSIGN)))
-                         .addStatement(new ExpressionStmt(new AssignExpr(
-                             new FieldAccessExpr(new ThisExpr(), "author"),
-                             new NameExpr("author"),
-                             AssignExpr.Operator.ASSIGN))));
-
-        book.addMethod("getTitle", Modifier.Keyword.PUBLIC);
-        BlockStmt blockStmt = new BlockStmt().addStatement(new ReturnStmt(new NameExpr("title")));
-        addMethod(cu, "Book", "getTitle", blockStmt);
-
-        book.addMethod("getAuthor", Modifier.Keyword.PUBLIC).setBody(
-            new BlockStmt().addStatement(new ReturnStmt(new NameExpr("author"))));
-
-        System.out.println(cu.toString());
-
-        String FILE_NAME = PATH + "Book.java";
-        Path path = Paths.get(FILE_NAME);
-        Files.createFile(path);
-        OutputStream out = new FileOutputStream(FILE_NAME);
-        out.write(cu.toString().getBytes());
-        out.close();
-    }
-
-    private static void addMethod(CompilationUnit cu, String className, String methodName, BlockStmt blockStmt) {
-        ClassOrInterfaceDeclaration classOrInterfaceDeclaration = cu.getClassByName(className).get();
-        MethodDeclaration methodDeclaration = classOrInterfaceDeclaration.getMethodsByName(methodName).get(0);
-        methodDeclaration.setBody(blockStmt);
 
     }
 

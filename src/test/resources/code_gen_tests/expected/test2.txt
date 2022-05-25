@@ -1,0 +1,20 @@
+package com.example.transpiler.generated;
+
+public class ClassName extends AnyValue {
+
+    Integer Min;
+
+    Integer Max;
+
+    public Integer MaxInt(Integer a) {
+        var max = Integer.Min;
+        var i = Integer.Plus(1);
+        while (i.Less(a)) {
+            if (a.get(i).Greater(max)) {
+                max = a.Plus(i);
+            }
+            i = i.Plus(1);
+        }
+        return max;
+    }
+}

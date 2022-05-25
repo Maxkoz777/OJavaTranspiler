@@ -26,6 +26,39 @@ public class ClassGenerator {
     private final String PATH = "src/main/java/com/example/transpiler/generated/";
     private final String PACKAGE = "com.example.transpiler.generated";
 
+    public String generateClassWithoutFileCreation(Tree tree, ClassType classType) {
+
+        CompilationUnit cu = new CompilationUnit();
+        cu.setPackageDeclaration(getPackage(classType));
+
+        Node classNode = TreeUtil.getMainClassNode(tree);
+
+        Pair<String, String> signature = TreeUtil.getClassSignature(classNode);
+
+        ClassOrInterfaceDeclaration mainClass = cu.addClass(signature.getFirst());
+        if (!Objects.isNull(signature.getSecond()) && !signature.getSecond().isEmpty()) {
+            mainClass.addExtends(signature.getSecond());
+        }
+
+        TreeUtil.getClassVariables(classNode)
+            .forEach(variable -> mainClass.addField(variable.getTypeName(), variable.getName()));
+
+        TreeUtil.getFunctions(classNode)
+            .forEach(function -> addFirstClassFunctionToClass(function, cu, signature.getFirst()));
+
+        TreeUtil.getConstructors(classNode)
+            .forEach(constructor -> ConstructorGenerator.generateConstructor(cu, constructor));
+
+        TreeUtil.getClassMethods(classNode)
+            .forEach(method -> MethodGenerator.generateMethod(cu, method, signature.getFirst()));
+
+        TreeUtil.getNestedClasses(classNode)
+            .forEach(nestedClass -> generateNestedClass(cu, nestedClass, mainClass));
+
+        return cu.toString();
+
+    }
+
     public void generateClass(Tree tree, ClassType classType) {
 
         CompilationUnit cu = new CompilationUnit();
