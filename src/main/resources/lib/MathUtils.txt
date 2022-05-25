@@ -1,6 +1,8 @@
 class MathUtils is
+
   var min : Integer
   var max : Integer
+  function<Integer, Integer> f := a -> Integer.Max
 
   this(bt : Integer, ar : Integer) is
       max := bt
@@ -14,9 +16,10 @@ class MathUtils is
    var m : Integer.Min
    var i : Integer.get(1)
    while i > m loop
-   if a > m then m := a.get(i) + i end
-   i := i + 1
-   m := 3
+      if a > m then m := a.get(i) + i end
+      i := i + 1
+      m := 3
+      m := this.f(min) + i
    end
    return max + i
   end
@@ -24,7 +27,7 @@ class MathUtils is
   class Child is
   end
 
-  method isPrime(k: Integer) : Boolean is
+  method isPrime(k2: Integer) : Boolean is
     var j : Integer
     j := 2
     return j - 1

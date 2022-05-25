@@ -327,7 +327,10 @@ public class GrammarChecker {
 
     private String verifyOperation() {
         String operation = "";
-        if (tokenType().equals(TokenType.OPERATOR)) {
+        if (
+            tokenType().equals(TokenType.OPERATOR)
+            && List.of("+", "-", "/", "==", ">=", ">", "<=", "<").contains(lexeme())
+        ) {
             operation += lexeme();
             incrementIndex();
         } else {
@@ -365,7 +368,7 @@ public class GrammarChecker {
             currentIndex = validIndex;
             try {
                 verifyToken("this");
-                node.setValue(lexeme());
+                node.setValue("this");
             } catch (Exception e) {
                 currentIndex = validIndex;
                 specifyClassName(node);
