@@ -101,6 +101,7 @@ class LexerTest {
         assertEquals(TokenType.IDENTIFIER, tokens.get(8).getType());
 
     }
+
     @Test
     void lexerTest08() throws InvalidTokenException, IOException {
         String program = getProgram(8);

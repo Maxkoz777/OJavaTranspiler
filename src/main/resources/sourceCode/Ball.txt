@@ -1,5 +1,2 @@
 class Ball is
-  method empty(bt : Integer, ar : Integer) : Integer is
-          function<Integer,Integer> f := a -> Integer.Max
-  end
 end

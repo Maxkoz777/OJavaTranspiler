@@ -443,7 +443,7 @@ public class TreeUtil {
 
     public Tree getTreeForClassName(String className) {
         return TypeChecker.trees.stream()
-                .filter(tree -> tree.getClassName().equals(className))
+                .filter(tree -> tree.getClassName().equalsIgnoreCase(className))
                 .findFirst()
                 .orElseThrow(
                         () -> new TypeCheckerException("No tree with class named: " + className)

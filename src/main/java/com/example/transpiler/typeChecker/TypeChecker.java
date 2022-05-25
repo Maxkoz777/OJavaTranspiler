@@ -94,9 +94,12 @@ public class TypeChecker {
                 );
             }
             if (types.isEmpty()) {
-                throw new TypeCheckerException(
-                    String.format("No type for variable %s found", debtVariable.getName())
-                );
+                VariableDeclaration declaration = TreeUtil.variableDeclarationFromNode(debtVariable.getDeclarationNode());
+                if (!knownTypes.contains(declaration.getTypeName())) {
+                    throw new TypeCheckerException(
+                        String.format("No defined type for variable %s found", debtVariable.getName())
+                    );
+                }
             }
         });
 
