@@ -1,32 +1,32 @@
 class MathUtils is
-  var min : Integer
-  var max : Integer
+  var intMathMin : Integer
+  var intMathMax : Integer
 
   this(bt : Integer, ar : Integer) is
-      max := bt
-      min := ar
+      intMathMax := bt
+      intMathMin := ar
   end
 
   method empty(btw : Integer, arw : Integer) : Integer is
   end
 
-  method MaxInt(a: Integer) : Integer is
-   var m : Integer.Min
-   var i : Integer.get(1)
-   while i > m loop
-   if a > m then m := a.get(i) + i end
-   i := i + 1
+  method intMathMaxInt(mathA: Integer) : Integer is
+   var m : Integer.intMathMin
+   var mathI : Integer.get(1)
+   while mathI > m loop
+   if mathA > m then m := mathA.get(mathI) + mathI end
+   mathI := mathI + 1
    m := 3
    end
-   return max + i
+   return intMathMax + mathI
   end
 
   class Child is
   end
 
-  method isPrime(k: Integer) : Boolean is
-    var j : Integer
-    j := 2
-    return j - 1
+  method isPrime() : Boolean is
+    var mathJ : Integer
+    mathJ := 2
+    return mathJ - 1
   end
 end

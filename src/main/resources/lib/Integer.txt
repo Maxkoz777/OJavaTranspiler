@@ -1,7 +1,7 @@
 class Integer is
   var int: Integer
-  this(val: Integer) is
-     int :=val
+  this(intVal: Integer) is
+     int :=intVal
   end
 
 
@@ -10,65 +10,47 @@ class Integer is
 
 
 
- method Plus(p:Integer) : Integer is
-    return int+p
+ method Plus(p1:Integer) : Integer is
+    return int+p1
  end
- method Plus(p:Real) : Real is
-    return int+p
+
+ method Minus(p2: Integer) : Integer is
+    return int-p2
  end
- method Minus(p: Integer) : Integer is
-    return int-p
+
+ method Mult(p3: Integer) : Integer is
+    return p3*int
  end
- method Minus(p: Real) : Real is
-    return int-p
- end
- method Mult(p: Integer) : Integer is
-    return p*int
- end
- method Mult(p: Real) : Real is
-     return p*int
- end
- method Div(p: Real) : Real is
-     var divided: Real
-     var partial: Integer
-     divided := int/p
-     partial := int%p
-     return divided-partial
- end
- method Div(p: Integer) : Real is
-     return p/int
+
+ method Div(p4: Integer) : Integer is
+     return p4/int
  end
 
 
+ method Less(p5: Integer) : Boolean is
+    return int<p5
+ end
 
- method Less(p: Integer) : Boolean is
-    return int<p
+ method LessEqual(p6: Integer) : Boolean is
+     return int<=p6
  end
- method Less(p: Real) : Boolean is
-     return int<p
+
+ method Greater(p7: Integer) : Boolean is
+     return int>p7
  end
- method LessEqual(p: Integer) : Boolean is
-     return int<=p
+
+ method GreaterEqual(p8: Integer) : Boolean is
+      return int>=p8
  end
- method LessEqual(p: Real) : Boolean is
-     return int<=p
+
+ method Equal(p9: Integer) : Boolean is
+      return int==p9
  end
- method Greater(p: Integer) : Boolean is
-     return int>p
- end
- method Greater(p: Real) : Boolean is
-     return int>p
- end
- method GreaterEqual(p: Integer) : Boolean is
-      return int>=p
- end
- method GreaterEqual(p: Real) : Boolean is
-      return int>=p
- end
- method Equal(p: Integer) : Boolean is
-      return int==p
- end
- method Equal(p: Real) : Boolean is
-      return p==int
+
+
+ method toBoolean(): Boolean is
+    var resultToBoolean: Boolean
+    if p == 0 then resultToBoolean := 0 else resultToBoolean := 1 end
+    return resultToBoolean
  end
 end
