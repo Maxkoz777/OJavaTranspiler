@@ -1,5 +1,6 @@
 class Boolean is
  var bool: Boolean
+
  this(boolVal: Boolean) is
     bool := boolVal
  end

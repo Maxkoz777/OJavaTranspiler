@@ -10,7 +10,11 @@ class MathUtils is
   method empty(btw : Integer, arw : Integer) : Integer is
   end
 
+  class Child is
+  end
+
   method isPrime(num1: Integer): Integer is
+    var childVariable : Child
     var iteratorPrime : Integer
     iteratorPrime := 2
     while iteratorPrime.LessEqual(num1) loop
