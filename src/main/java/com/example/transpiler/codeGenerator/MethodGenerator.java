@@ -8,16 +8,12 @@ import com.example.transpiler.syntaxer.Node;
 import com.example.transpiler.syntaxer.TreeUtil;
 import com.example.transpiler.typeChecker.TypeCheckerException;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Modifier.Keyword;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.LiteralStringValueExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -30,7 +26,6 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import java.util.List;
 import java.util.Objects;
-import javax.swing.plaf.nimbus.State;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -39,22 +34,25 @@ public class MethodGenerator {
     private String className;
 
 
+    /**
+     * Generates method from provided components
+     * @param cu
+     * @param method
+     * @param className
+     */
     public void generateMethod(CompilationUnit cu, Method method, String className) {
         MethodGenerator.className = className;
-        List<Node> bodyNodes = method.getBody().getChildNodes();
-
         ClassOrInterfaceDeclaration clazz = cu.getClassByName(className)
             .orElseThrow(() -> new CompilationException("class name wasn't specified for provided method"));
-        MethodDeclaration methodDeclaration = clazz.addMethod(method.getName(), Keyword.PUBLIC);
-        method.getParameters().forEach(parameter -> methodDeclaration.addAndGetParameter(
-                                                                        parameter.getType(),
-                                                                        parameter.getName()
-                                                                    ));
-        methodDeclaration.setType(method.getType());
-        BlockStmt blockStmt = generateBody(bodyNodes);
-        methodDeclaration.setBody(blockStmt);
+        generateMethod(clazz, method, className);
     }
 
+    /**
+     * Generates method from provided components
+     * @param clazz
+     * @param method
+     * @param className
+     */
     public void generateMethod(ClassOrInterfaceDeclaration clazz, Method method, String className) {
         MethodGenerator.className = className;
         List<Node> bodyNodes = method.getBody().getChildNodes();

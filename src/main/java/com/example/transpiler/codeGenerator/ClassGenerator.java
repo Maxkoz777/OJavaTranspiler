@@ -26,8 +26,24 @@ public class ClassGenerator {
     private final String PATH = "src/main/java/com/example/transpiler/generated/";
     private final String PACKAGE = "com.example.transpiler.generated";
 
+    /**
+     *
+     * @param tree
+     * @param classType
+     * @return String for java-class
+     */
     public String generateClassWithoutFileCreation(Tree tree, ClassType classType) {
+        CompilationUnit cu = getCompilationUnit(tree, classType);
+        return cu.toString();
+    }
 
+    /**
+     *
+     * @param tree
+     * @param classType
+     * @return CompilationUnit that can be transformed into real java-class
+     */
+    private CompilationUnit getCompilationUnit(Tree tree, ClassType classType) {
         CompilationUnit cu = new CompilationUnit();
         cu.setPackageDeclaration(getPackage(classType));
 
@@ -55,43 +71,25 @@ public class ClassGenerator {
         TreeUtil.getNestedClasses(classNode)
             .forEach(nestedClass -> generateNestedClass(cu, nestedClass, mainClass));
 
-        return cu.toString();
-
+        return cu;
     }
 
+    /**
+     * Generates java-class from CompilationUnit
+     * @param tree
+     * @param classType
+     */
     public void generateClass(Tree tree, ClassType classType) {
-
-        CompilationUnit cu = new CompilationUnit();
-        cu.setPackageDeclaration(getPackage(classType));
-
-        Node classNode = TreeUtil.getMainClassNode(tree);
-
-        Pair<String, String> signature = TreeUtil.getClassSignature(classNode);
-
-        ClassOrInterfaceDeclaration mainClass = cu.addClass(signature.getFirst());
-        if (!Objects.isNull(signature.getSecond()) && !signature.getSecond().isEmpty()) {
-            mainClass.addExtends(signature.getSecond());
-        }
-
-        TreeUtil.getClassVariables(classNode)
-                .forEach(variable -> mainClass.addField(variable.getTypeName(), variable.getName()));
-
-        TreeUtil.getFunctions(classNode)
-                .forEach(function -> addFirstClassFunctionToClass(function, cu, signature.getFirst()));
-
-        TreeUtil.getConstructors(classNode)
-            .forEach(constructor -> ConstructorGenerator.generateConstructor(cu, constructor));
-
-        TreeUtil.getClassMethods(classNode)
-                .forEach(method -> MethodGenerator.generateMethod(cu, method, signature.getFirst()));
-
-        TreeUtil.getNestedClasses(classNode)
-                .forEach(nestedClass -> generateNestedClass(cu, nestedClass, mainClass));
-
-        generateCode(cu, classType, signature.getFirst());
-
+        CompilationUnit cu = getCompilationUnit(tree, classType);
+        generateCode(cu, classType, tree.getClassName());
     }
 
+    /**
+     * Self-descriptive
+     * @param function
+     * @param cu - CompilationUnit
+     * @param className
+     */
     private void addFirstClassFunctionToClass(FirstClassFunction function,
                                                      CompilationUnit cu,
                                                      String className) {
@@ -103,10 +101,21 @@ public class ClassGenerator {
         clazz.addFieldWithInitializer(type, function.getName(), lambda, keywords);
     }
 
+    /**
+     *
+     * @param function
+     * @return Java signature for first-class functions from O-language
+     */
     private String getTypeForFunction(FirstClassFunction function) {
         return "Function<" + function.getInputType() + ", " + function.getOutputType() + ">";
     }
 
+    /**
+     * Generate nested classes for CompilationUnit
+     * @param cu
+     * @param nestedClass
+     * @param mainClass
+     */
     private void generateNestedClass(CompilationUnit cu, Node nestedClass, ClassOrInterfaceDeclaration mainClass) {
         String className = TreeUtil.getClassSignature(nestedClass).getFirst();
         ClassOrInterfaceDeclaration clazz = new ClassOrInterfaceDeclaration(
@@ -131,6 +140,12 @@ public class ClassGenerator {
         mainClass.addMember(clazz);
     }
 
+    /**
+     * Self-descriptive
+     * @param cu
+     * @param type
+     * @param name
+     */
     private void generateCode(CompilationUnit cu, ClassType type, String name) {
         saveFile(
             cu.toString().getBytes(StandardCharsets.UTF_8),
@@ -138,6 +153,12 @@ public class ClassGenerator {
         );
     }
 
+    /**
+     *
+     * @param name
+     * @param classType
+     * @return path to generated file
+     */
     private String getFilePath(String name, ClassType classType) {
         StringBuilder builder = new StringBuilder(PATH);
         if (classType.equals(ClassType.LIBRARY)) {
@@ -148,6 +169,11 @@ public class ClassGenerator {
         return builder.toString();
     }
 
+    /**
+     * Self-descriptive
+     * @param content
+     * @param fullPath
+     */
     private void saveFile(byte[] content, String fullPath) {
         try(OutputStream out = new FileOutputStream(fullPath)) {
             out.write(content);
@@ -156,6 +182,11 @@ public class ClassGenerator {
         }
     }
 
+    /**
+     *
+     * @param type
+     * @return package name based on initial purpose of file(lib or source)
+     */
     private String getPackage(ClassType type) {
         return switch (type) {
             case LIBRARY -> PACKAGE + ".lib";

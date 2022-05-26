@@ -26,7 +26,6 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TypeChecker {
 
-    //
     public int treesCount = 0;
     public List<Tree> trees = new ArrayList<>();
     public boolean isTreeArrayReady = false;
