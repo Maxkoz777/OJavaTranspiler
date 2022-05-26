@@ -308,7 +308,7 @@ public class GrammarChecker {
             } catch (Exception exception) {
                 currentIndex = validIndex;
                 node.deleteLastChild();
-                break;
+//                break;
             }
         }
     }

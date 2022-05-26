@@ -1,0 +1,15 @@
+class Person is
+    var height: Integer
+    var weight: Integer
+    var isMarried: Boolean
+
+      this(ht : Integer, wt : Integer, ist: Boolean) is
+          height := ht
+          weight := wt
+          isMarried := ist
+      end
+
+      this() is
+      end
+
+end

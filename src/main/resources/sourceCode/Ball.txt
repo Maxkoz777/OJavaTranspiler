@@ -10,7 +10,7 @@ class Ball is
 
       method test123(): Integer is
         var fff : Boolean
-        var ddd : Integer
+        var ddd : Integer.Max.Plus(fff)
         fff := this.func(ddd)
         return 1
       end

@@ -17,6 +17,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import lombok.experimental.UtilityClass;
 
@@ -25,6 +27,7 @@ public class ClassGenerator {
 
     private final String PATH = "src/main/java/com/example/transpiler/generated/";
     private final String PACKAGE = "com.example.transpiler.generated";
+    private List<String> importsFromLibs = new ArrayList<>();
 
     /**
      *
@@ -46,6 +49,12 @@ public class ClassGenerator {
     private CompilationUnit getCompilationUnit(Tree tree, ClassType classType) {
         CompilationUnit cu = new CompilationUnit();
         cu.setPackageDeclaration(getPackage(classType));
+        if (classType.equals(ClassType.LIBRARY)) {
+            importsFromLibs.add(tree.getClassName());
+        }
+        if (classType.equals(ClassType.SOURCE)) {
+            importsFromLibs.forEach(im -> cu.addImport("com.example.transpiler.generated.lib." + im));
+        }
 
         Node classNode = TreeUtil.getMainClassNode(tree);
 
