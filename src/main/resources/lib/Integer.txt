@@ -45,11 +45,4 @@ class Integer is
  method Equal(p9: Integer) : Boolean is
       return libInt == p9
  end
-
-
- method toBoolean(): Boolean is
-    var resultToBoolean: Boolean
-    if p == 0 then resultToBoolean := 0 else resultToBoolean := 1 end
-    return resultToBoolean
- end
 end

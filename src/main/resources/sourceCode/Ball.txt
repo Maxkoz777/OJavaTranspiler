@@ -1,2 +1,16 @@
 class Ball is
+    var ballWeight: Integer
+    var isFootball: Boolean
+
+      this(iv : Integer, ib : Boolean) is
+          ballWeight := iv
+          isFootball := ib
+      end
+
+      method test123(): Integer is
+        var fff : Boolean
+        var ddd : Integer
+        fff := ddd
+        return 1
+      end
 end

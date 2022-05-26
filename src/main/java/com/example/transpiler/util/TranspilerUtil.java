@@ -17,7 +17,6 @@ public class TranspilerUtil {
      */
     public List<File> retrieveSourceLanguageFiles() {
         List<File> files = getResourceFolderFiles("sourceCode");
-        TypeChecker.treesCount += files.size();
         return files;
     }
 
@@ -27,7 +26,7 @@ public class TranspilerUtil {
      */
     public List<File> retrieveSourceLanguageLibraryFiles() {
         List<File> files = getResourceFolderFiles("lib");
-        TypeChecker.treesCount += files.size();
+        TypeChecker.treesCount += files.size() + getResourceFolderFiles("sourceCode").size();
         return files;
     }
 

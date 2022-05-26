@@ -9,6 +9,7 @@ import com.example.transpiler.syntaxer.Node;
 import com.example.transpiler.syntaxer.Tree;
 import com.example.transpiler.syntaxer.TreeUtil;
 import com.example.transpiler.util.Pair;
+import com.example.transpiler.util.TranspilerUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -105,14 +106,17 @@ public class TypeChecker {
             Set<String> types = debtVariable.getExpressionsWithTypes().stream()
                 .map(x -> TypeChecker.typeForExpressionWithTypes(x, debtVariable).toUpperCase(Locale.ROOT))
                 .collect(Collectors.toSet());
+            VariableDeclaration declaration = TreeUtil.variableDeclarationFromNode(
+                debtVariable.getDeclarationNode());
+            if (!declaration.getType().equals(JavaType.UNDEFINED)) {
+                types.add(declaration.getType().name());
+            }
             if (types.size() > 1) {
                 throw new TypeCheckerException(
                     String.format("Multiple types for variable %s provided", debtVariable.getName())
                 );
             }
             if (types.isEmpty()) {
-                VariableDeclaration declaration = TreeUtil.variableDeclarationFromNode(
-                    debtVariable.getDeclarationNode());
                 if (!knownTypes.contains(declaration.getTypeName())) {
                     throw new TypeCheckerException(
                         String.format("No defined type for variable %s found", debtVariable.getName())
