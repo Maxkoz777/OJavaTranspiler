@@ -31,8 +31,6 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class MethodGenerator {
 
-    private String className;
-
 
     /**
      * Generates method from provided components
@@ -41,7 +39,6 @@ public class MethodGenerator {
      * @param className
      */
     public void generateMethod(CompilationUnit cu, Method method, String className) {
-        MethodGenerator.className = className;
         ClassOrInterfaceDeclaration clazz = cu.getClassByName(className)
             .orElseThrow(() -> new CompilationException("class name wasn't specified for provided method"));
         generateMethod(clazz, method, className);
@@ -54,7 +51,6 @@ public class MethodGenerator {
      * @param className
      */
     public void generateMethod(ClassOrInterfaceDeclaration clazz, Method method, String className) {
-        MethodGenerator.className = className;
         List<Node> bodyNodes = method.getBody().getChildNodes();
         MethodDeclaration methodDeclaration = clazz.addMethod(method.getName(), Keyword.PUBLIC);
         method.getParameters().forEach(parameter -> methodDeclaration.addAndGetParameter(

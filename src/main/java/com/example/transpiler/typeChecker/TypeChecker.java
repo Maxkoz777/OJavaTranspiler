@@ -26,12 +26,18 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TypeChecker {
 
+    // number of trees left to parse before global check
     public int treesCount = 0;
+    // all trees for compilation
     public List<Tree> trees = new ArrayList<>();
+    // flag showing necessity to start global check
     public boolean isTreeArrayReady = false;
+    // all variables that will be checked
     private final List<DebtVariable> variablesToCheck = new ArrayList<>();
+    // all type from all trees
     public List<String> knownTypes = new ArrayList<>();
     private Tree currentTree;
+    // regex for real/integer values
     private final String NUMBER = "^(?=.)([+-]?([0-9]*)(\\.([0-9]+))?)$";
 
     public void check(Tree tree) {
@@ -41,12 +47,19 @@ public class TypeChecker {
         processCheckUnitForClass(TreeUtil.getAllVariablesForProgram(tree));
     }
 
+    /**
+     * fills main fields
+     * @param tree
+     */
     private void analyseTree(Tree tree) {
         tree.setClassName(TreeUtil.getNameForTree(tree));
         trees.add(tree);
         knownTypes.addAll(TreeUtil.getAllTypesForTree(tree));
     }
 
+    /**
+     * Checks for necessity for global check
+     */
     private void checkIfReadyToParseAllVariables() {
         treesCount--;
         if (treesCount == 0) {
@@ -54,6 +67,10 @@ public class TypeChecker {
         }
     }
 
+    /**
+     * Analyses all checkUnits for potential variables to check
+     * @param unit
+     */
     private void processCheckUnitForClass(CheckUnit unit) {
         List<Variable> variables = unit.getVariableDeclarations().stream()
             .map(variableDeclaration -> {
@@ -106,6 +123,12 @@ public class TypeChecker {
 
     }
 
+    /**
+     *
+     * @param variableExpression
+     * @param debtVariable
+     * @return type for expression
+     */
     private String typeForExpressionWithTypes(VariableExpression variableExpression, DebtVariable debtVariable) {
 
         if (isOperationIncluded(variableExpression)) {
@@ -179,6 +202,11 @@ public class TypeChecker {
         );
     }
 
+    /**
+     *
+     * @param variableExpression
+     * @return type for expression if searching in another tree
+     */
     private static String typeFromSearchInAnotherTree(VariableExpression variableExpression) {
         TypeRecursiveDefinitionDto typeRecursiveDefinitionDto = getTypeRecursiveDefinitionDto(
             variableExpression.getWholeExpression()
@@ -200,14 +228,30 @@ public class TypeChecker {
         );
     }
 
+    /**
+     *
+     * @param term
+     * @return true if need to search type in another tree
+     */
     private boolean isAnotherTreeSearch(String term) {
         return knownTypes.contains(term);
     }
 
+    /**
+     *
+     * @param expression
+     * @return integer/real type for provided number
+     */
     private String typeForDigits(String expression) {
         return expression.contains(".") ? "Real" : "Integer";
     }
 
+    /**
+     *
+     * @param variableExpression
+     * @param debtVariable
+     * @return type for variableExpression inside debtVariable
+     */
     private String typeForExpressionWithOperation(VariableExpression variableExpression,
                                                   DebtVariable debtVariable) {
         Tree tree = debtVariable.getTree();
@@ -279,11 +323,24 @@ public class TypeChecker {
 
     }
 
+    /**
+     *
+     * @param variableExpression
+     * @return true if our expression is a math expression
+     */
     private boolean isOperationIncluded(VariableExpression variableExpression) {
         List<String> operations = List.of("+", "-", "/", "==", ">=", ">", "<=", "<", "*");
         return operations.stream().anyMatch(op -> variableExpression.getWholeExpression().contains(op));
     }
 
+    /**
+     * Main method for type-checking process
+     * @param term
+     * @param termDeclaration
+     * @param wholeExpression
+     * @param tree
+     * @return type for given expression
+     */
     private String getTypeRecursively(String term, Node termDeclaration, String wholeExpression, Tree tree) {
 
         if (
@@ -438,6 +495,11 @@ public class TypeChecker {
         return type;
     }
 
+    /**
+     *
+     * @param input
+     * @return DTO for recursive type definition process
+     */
     private static TypeRecursiveDefinitionDto getTypeRecursiveDefinitionDto(String input) {
         String wholeExpression = input;
         int dotPosition = wholeExpression.indexOf('.');
@@ -501,11 +563,21 @@ public class TypeChecker {
         }
     }
 
+    /**
+     *
+     * @param parameterDeclaration
+     * @return parameter type
+     */
     private String getParameterTypeByDeclaration(Node parameterDeclaration) {
         return parameterDeclaration.getChildNodes().get(1)
             .getChildNodes().get(0).getValue();
     }
 
+    /**
+     *
+     * @param methodDeclaration
+     * @return type for declaration node based on type(function/method)
+     */
     private String getMethodReturnTypeByDeclaration(Node methodDeclaration) {
         int index;
         if (methodDeclaration.getType().equals(FormalGrammar.METHOD_DECLARATION)) {
@@ -516,6 +588,11 @@ public class TypeChecker {
         return methodDeclaration.getChildNodes().get(index).getValue();
     }
 
+    /**
+     * groups problem variables with its assignments
+     * @param problemVariables
+     * @param assignments
+     */
     private void checkProblemVariables(List<Variable> problemVariables,
                                        List<Assignment> assignments) {
         problemVariables.forEach(variable -> {
@@ -526,6 +603,11 @@ public class TypeChecker {
         });
     }
 
+    /**
+     * groups variable with its assignments
+     * @param variable
+     * @param assignments
+     */
     private void checkVariableAgainstAssignments(Variable variable, List<Assignment> assignments) {
         Map<Node, String> expressionWithNodeMap = new HashMap<>();
         assignments.forEach(assignment -> expressionWithNodeMap.put(
@@ -538,6 +620,11 @@ public class TypeChecker {
         populateDebtVariables(variable, expressionWithNodeMap);
     }
 
+    /**
+     * fills List of conflicting variables
+     * @param variable
+     * @param expressionsWithNodes
+     */
     private void populateDebtVariables(Variable variable, Map<Node, String> expressionsWithNodes) {
         DebtVariable debtVariable = new DebtVariable(
             variable.getName(),
@@ -549,6 +636,11 @@ public class TypeChecker {
         variablesToCheck.add(debtVariable);
     }
 
+    /**
+     *
+     * @param expressionWithNode expressions with their definitions in tree
+     * @return DTO for more convenient work with problem variables
+     */
     private VariableExpression getNameWithTypeOfExpression(Map.Entry<Node, String> expressionWithNode) {
         String expression = expressionWithNode.getValue();
         Node node = expressionWithNode.getKey();
@@ -561,8 +653,17 @@ public class TypeChecker {
         return new VariableExpression(name, result, expression, node, isAssignment);
     }
 
+    /**
+     * Predicate for choosing only potential conflicting types
+     */
     private final Predicate<Pair<Variable, Long>> isNotStrictlyDefined = pair -> pair.getSecond() > 0;
 
+    /**
+     *
+     * @param variables
+     * @param assignments
+     * @return List of pairs of variables with number of their assignments in code
+     */
     private List<Pair<Variable, Long>> getVariableWithNumberOfAssignmentsInCode(List<Variable> variables,
                                                                                 List<Assignment> assignments) {
         return variables.stream()
@@ -570,6 +671,12 @@ public class TypeChecker {
             .toList();
     }
 
+    /**
+     *
+     * @param variable
+     * @param assignments
+     * @return number of assignments for current variable in code
+     */
     private Long numberOfAssignmentsForVariable(Variable variable, List<Assignment> assignments) {
         return assignments.stream()
             .filter(assignment -> assignment.getVarName().equals(variable.getName()))
