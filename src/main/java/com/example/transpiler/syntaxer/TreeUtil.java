@@ -506,8 +506,8 @@ public class TreeUtil {
      * @param name
      * @param scope
      * @param tree
-     * @return variable/parameter declaration for given name inside provided tree starting from inner scope
-     *          and then going to CLASS_DECLARATION node if not found earlier
+     * @return variable/parameter declaration for variable/parameter name in given scope
+     * if no such variable in scope- returns null
      */
     public Node getVariableDeclarationByVariableName(String name, Node scope, Tree tree) {
         Node result;
@@ -539,6 +539,13 @@ public class TreeUtil {
     public List<Node> variableDeclarations;
     public List<Node> parameterDeclarations;
 
+    /**
+     *
+     * @param name
+     * @param scope
+     * @return variable/parameter declaration for given name inside provided tree starting from inner scope
+     *          and then going to CLASS_DECLARATION node if not found earlier
+     */
     public Node findVariableDeclarationNodeInScopeByName(String name, Node scope) {
         variableDeclarations = new ArrayList<>();
         parameterDeclarations = new ArrayList<>();
@@ -575,6 +582,14 @@ public class TreeUtil {
     }
 
     //........................................................................//
+    /**
+     *
+     * @param name
+     * @param node
+     * @return fill the variable appearence in node by its declarations
+     *
+     */
+
     public void searchVariables(Node node, String name) {
         if (node.getType().equals(FormalGrammar.VARIABLE_DECLARATION)) {
             if (Objects.equals(node.getChildNodes().get(0).getValue(), name)) {

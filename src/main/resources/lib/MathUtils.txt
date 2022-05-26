@@ -10,8 +10,21 @@ class MathUtils is
   method empty(btw : Integer, arw : Integer) : Integer is
   end
 
-  class Child is
+  class Point is
+    var px1 : Integer
+    var px2 : Integer
+    this(x1: Integer, x2: Integer) is
+        px1 := x1
+        px2 := x2
+    end
+
+    method getSumSquares(): Integer is
+        return px1.sqr(2) + px2.sqr(2)
+    end
+
   end
+
+
 
   method isPrime(num1: Integer): Integer is
     var childVariable : Child
