@@ -4,19 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.example.transpiler.lexer.Lexer;
 import com.example.transpiler.syntaxer.GrammarChecker;
 import com.example.transpiler.syntaxer.Tree;
-import com.example.transpiler.syntaxer.TreeUtil;
 import com.example.transpiler.typeChecker.TypeChecker;
 import com.example.transpiler.typeChecker.TypeCheckerException;
-import com.example.transpiler.util.TranspilerUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -113,6 +108,20 @@ class TypeCheckerTest {
     }
 
     @Test
+    void typeCheckerTest6() throws IOException {
+
+        String program = getProgram(7);
+        var tokens = Lexer.getTokensFromCode(program);
+        Tree tree;
+        String stringWithTokens = tokens.toString();
+        log.info("Array with tokens: {}", stringWithTokens);
+        tree = GrammarChecker.checkGrammar(tokens);
+        TypeChecker.knownTypes.add(tree.getClassName());
+        TypeChecker.check(tree);
+
+    }
+
+    @Test
     void typeCheckerTest5() throws IOException {
 
         String program = getProgram(6);
@@ -128,6 +137,42 @@ class TypeCheckerTest {
             () -> TypeChecker.check(tree)
         );
         assertEquals("No definition for variable sdfwlijfnvsdl", exception.getMessage());
+    }
+
+    @Test
+    void typeCheckerTest7() throws IOException {
+
+        String program = getProgram(8);
+        var tokens = Lexer.getTokensFromCode(program);
+        Tree tree;
+        String stringWithTokens = tokens.toString();
+        log.info("Array with tokens: {}", stringWithTokens);
+        tree = GrammarChecker.checkGrammar(tokens);
+        TypeChecker.knownTypes.add(tree.getClassName());
+
+        Exception exception = assertThrows(
+            TypeCheckerException.class,
+            () -> TypeChecker.check(tree)
+        );
+        assertEquals("Multiple types for variable fff provided", exception.getMessage());
+    }
+
+    @Test
+    void typeCheckerTest8() throws IOException {
+
+        String program = getProgram(9);
+        var tokens = Lexer.getTokensFromCode(program);
+        Tree tree;
+        String stringWithTokens = tokens.toString();
+        log.info("Array with tokens: {}", stringWithTokens);
+        tree = GrammarChecker.checkGrammar(tokens);
+        TypeChecker.knownTypes.add(tree.getClassName());
+
+        Exception exception = assertThrows(
+            TypeCheckerException.class,
+            () -> TypeChecker.check(tree)
+        );
+        assertEquals("Trying to apply + to entities of non-comparable type: Boolean", exception.getMessage());
     }
 
 }
