@@ -62,6 +62,10 @@ public class ClassGenerator {
         TreeUtil.getFunctions(classNode)
             .forEach(function -> addFirstClassFunctionToClass(function, cu, signature.getFirst()));
 
+        if (!TreeUtil.getFunctions(classNode).isEmpty()) {
+            cu.addImport("java.util.function.Function");
+        }
+
         TreeUtil.getConstructors(classNode)
             .forEach(constructor -> ConstructorGenerator.generateConstructor(cu, constructor));
 

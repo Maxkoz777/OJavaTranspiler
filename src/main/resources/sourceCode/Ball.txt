@@ -1,6 +1,7 @@
 class Ball is
     var ballWeight: Integer
     var isFootball: Boolean
+    function<Integer, Boolean> func := qwer -> Integer.Greater(7)
 
       this(iv : Integer, ib : Boolean) is
           ballWeight := iv
@@ -10,7 +11,7 @@ class Ball is
       method test123(): Integer is
         var fff : Boolean
         var ddd : Integer
-        fff := ddd
+        fff := this.func(ddd)
         return 1
       end
 end
