@@ -9,7 +9,6 @@ import com.example.transpiler.syntaxer.Node;
 import com.example.transpiler.syntaxer.Tree;
 import com.example.transpiler.syntaxer.TreeUtil;
 import com.example.transpiler.util.Pair;
-import com.example.transpiler.util.TranspilerUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -276,30 +275,37 @@ public class TypeChecker {
         TypeRecursiveDefinitionDto first = getTypeRecursiveDefinitionDto(expressions[0]);
         TypeRecursiveDefinitionDto second = getTypeRecursiveDefinitionDto(expressions[2]);
 
+        if (Objects.isNull(first.getTree())) {
+            first.setTree(tree);
+        }
+        if (Objects.isNull(second.getTree())) {
+            second.setTree(tree);
+        }
+
         String firstType = getTypeRecursively(
             first.getTerm(),
             first.getType().equals(ExpressionResult.METHOD) ?
-                TreeUtil.getMethodDeclarationNodeByMethodName(first.getTerm(), tree) :
+                TreeUtil.getMethodDeclarationNodeByMethodName(first.getTerm(), first.getTree()) :
                 TreeUtil.getVariableDeclarationByVariableName(first.getTerm(),
-                                                              TreeUtil.getNodeScope(tree,
+                                                              TreeUtil.getNodeScope(first.getTree(),
                                                                                     variableExpression.getAssignmentNode()),
-                                                              tree
+                                                              first.getTree()
                 ),
             first.getExpression(),
-            tree
+            first.getTree()
         );
 
         String secondType = getTypeRecursively(
             second.getTerm(),
             second.getType().equals(ExpressionResult.METHOD) ?
-                TreeUtil.getMethodDeclarationNodeByMethodName(second.getTerm(), tree) :
+                TreeUtil.getMethodDeclarationNodeByMethodName(second.getTerm(), second.getTree()) :
                 TreeUtil.getVariableDeclarationByVariableName(second.getTerm(),
-                                                              TreeUtil.getNodeScope(tree,
+                                                              TreeUtil.getNodeScope(second.getTree(),
                                                                                     variableExpression.getAssignmentNode()),
-                                                              tree
+                                                              second.getTree()
                 ),
             second.getExpression(),
-            tree
+            second.getTree()
         );
 
         Set<String> set = new HashSet<>();
@@ -321,7 +327,7 @@ public class TypeChecker {
                 return firstType;
             } else {
                 throw new TypeCheckerException(
-                    "Trying to apply " + operation + " to entities of non-lib type: " + firstType);
+                    "Trying to apply " + operation + " to entities of non-comparable type: " + firstType);
             }
         }
 

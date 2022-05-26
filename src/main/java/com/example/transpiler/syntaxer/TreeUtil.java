@@ -512,6 +512,9 @@ public class TreeUtil {
     public Node getVariableDeclarationByVariableName(String name, Node scope, Tree tree) {
         Node result;
         Node currentScope = scope;
+        if (Objects.isNull(currentScope)) {
+            currentScope = TreeUtil.getMainClassNode(tree);
+        }
         do {
             result = findVariableDeclarationNodeInScopeByName(name, currentScope);
             if (result == null) {
